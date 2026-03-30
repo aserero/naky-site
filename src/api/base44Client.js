@@ -80,6 +80,24 @@ const invoiceColumnMap = {
   pdf_url: 'pdf_url',
 };
 
+const candidatureColumnMap = {
+  email: 'email',
+  civilite: 'civilite',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  phone: 'phone',
+  address: 'address',
+  zipcode: 'zipcode',
+  city: 'city',
+  permis_sejour: 'permis_sejour',
+  heures_semaine: 'heures_semaine',
+  annees_experience: 'annees_experience',
+  lieux_experience: 'lieux_experience',
+  vehicule: 'vehicule',
+  cv_url: 'cv_url',
+  status: 'status',
+};
+
 function uuid() {
   return globalThis.crypto?.randomUUID?.() || `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -193,6 +211,15 @@ function normalizeInvoice(row = {}) {
   };
 }
 
+function normalizeCandidature(row = {}) {
+  return {
+    ...row,
+    created_date: row.created_at,
+    lieux_experience: Array.isArray(row.lieux_experience) ? row.lieux_experience : [],
+    status: row.status || 'pending',
+  };
+}
+
 function mapClientForDb(input = {}) {
   const output = {};
   Object.entries(input).forEach(([key, value]) => {
@@ -270,6 +297,15 @@ function mapInvoiceForDb(input = {}) {
   const output = {};
   Object.entries(input).forEach(([key, value]) => {
     const mappedKey = invoiceColumnMap[key];
+    if (mappedKey) output[mappedKey] = value;
+  });
+  return output;
+}
+
+function mapCandidatureForDb(input = {}) {
+  const output = {};
+  Object.entries(input).forEach(([key, value]) => {
+    const mappedKey = candidatureColumnMap[key];
     if (mappedKey) output[mappedKey] = value;
   });
   return output;
@@ -420,6 +456,33 @@ export const base44 = {
       throw new Error(`Function ${name} is not connected yet in Supabase.`);
     },
   },
+  integrations: {
+    Core: {
+      async UploadFile({ file }) {
+        if (!file) {
+          throw new Error('Missing file');
+        }
+
+        const extension = file.name?.includes('.') ? file.name.split('.').pop() : 'bin';
+        const fileName = `${Date.now()}-${uuid()}.${extension}`;
+        const filePath = `uploads/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from('partner-files')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        const { data } = supabase.storage.from('partner-files').getPublicUrl(filePath);
+        return { file_url: data.publicUrl };
+      },
+    },
+  },
   entities: {
     Client: {
       async list(order, limit = 200) {
@@ -551,19 +614,31 @@ export const base44 = {
       },
     },
     Candidature: {
-      async list() {
-        return [];
+      async list(order, limit = 200) {
+        return selectMany('candidatures', {}, { order, limit }, candidatureColumnMap, normalizeCandidature);
       },
-      async filter() {
-        return [];
+      async filter(filters = {}) {
+        return selectMany('candidatures', filters, {}, candidatureColumnMap, normalizeCandidature);
       },
       async create(data = {}) {
-        return { id: uuid(), ...data };
+        const payload = mapCandidatureForDb(data);
+        const { data: inserted, error } = await supabase
+          .from('candidatures')
+          .insert(payload)
+          .select('*')
+          .single();
+        if (error) throw error;
+        return normalizeCandidature(inserted);
       },
       async update(id, data = {}) {
-        return { id, ...data };
+        const payload = mapCandidatureForDb(data);
+        const { error } = await supabase.from('candidatures').update(payload).eq('id', id);
+        if (error) throw error;
+        return selectOne('candidatures', id, normalizeCandidature);
       },
-      async delete() {
+      async delete(id) {
+        const { error } = await supabase.from('candidatures').delete().eq('id', id);
+        if (error) throw error;
         return true;
       },
     },
