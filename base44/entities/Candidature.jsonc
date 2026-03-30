@@ -1,0 +1,92 @@
+{
+  "name": "Candidature",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "civilite": {
+      "type": "string",
+      "enum": [
+        "M",
+        "Mme"
+      ]
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "zipcode": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "permis_sejour": {
+      "type": "string",
+      "enum": [
+        "francaise",
+        "europeenne",
+        "titre_residence",
+        "visa",
+        "aucun"
+      ]
+    },
+    "heures_semaine": {
+      "type": "string",
+      "enum": [
+        "5-15",
+        "15-30",
+        "31-35"
+      ]
+    },
+    "annees_experience": {
+      "type": "string",
+      "enum": [
+        "aucune",
+        "moins_2ans",
+        "plus_2ans",
+        "plus_5ans"
+      ]
+    },
+    "lieux_experience": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vehicule": {
+      "type": "string",
+      "enum": [
+        "voiture",
+        "scooter",
+        "velo",
+        "non"
+      ]
+    },
+    "cv_url": {
+      "type": "string",
+      "description": "URL du CV upload\u00e9"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "email"
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "address": {
+      "type": "string"
+    },
+    "zipcode": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "additional_address": {
+      "type": "string"
+    },
+    "advance_immediate": {
+      "type": "boolean",
+      "default": false
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "regular",
+        "one_time",
+        "spring",
+        "enterprise"
+      ],
+      "default": "regular"
+    },
+    "has_animals": {
+      "type": "boolean",
+      "default": false
+    },
+    "duration": {
+      "type": "string"
+    },
+    "hours": {
+      "type": "number",
+      "description": "Nombre d'heures r\u00e9elles de la prestation"
+    },
+    "hourly_rate": {
+      "type": "number",
+      "description": "Tarif horaire appliqu\u00e9 (\u20ac/h)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "contact_details": {
+      "type": "object",
+      "properties": {
+        "gender": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "birthdate": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "avance_immediate",
+        "generated",
+        "paid"
+      ],
+      "default": "none",
+      "description": "Statut de facturation"
+    },
+    "total_price": {
+      "type": "number"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "ID of the assigned employee"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client entity"
+    },
+    "recurrence": {
+      "type": "string",
+      "enum": [
+        "none",
+        "weekly",
+        "twice_weekly",
+        "biweekly",
+        "monthly"
+      ],
+      "default": "none"
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Special instructions for the cleaning"
+    },
+    "has_cleaning_supplies": {
+      "type": "boolean",
+      "default": false
+    },
+    "urssaf_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "requested",
+        "accepted",
+        "refused"
+      ],
+      "default": "none",
+      "description": "Statut de la demande URSSAF"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "urssaf"
+      ],
+      "description": "Mode de paiement utilis\u00e9"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "ID de la facture dans Abby"
+    },
+    "invoice_file_url": {
+      "type": "string",
+      "description": "URL du fichier PDF de la facture"
+    }
+  },
+  "required": [
+    "address",
+    "zipcode",
+    "city",
+    "service_type"
+  ]
+}

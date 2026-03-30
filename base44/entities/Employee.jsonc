@@ -1,0 +1,70 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "joined_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "hourly_rate": {
+      "type": "number",
+      "description": "Co\u00fbt horaire de l'employ\u00e9e (\u20ac/h)"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color for calendar display"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL de la photo de profil de l'employ\u00e9e"
+    },
+    "documents": {
+      "type": "array",
+      "description": "Liste des documents de l'employ\u00e9e",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "uploaded_at": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name"
+  ]
+}
