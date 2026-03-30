@@ -99,8 +99,8 @@ const ServiceCard = ({ icon: Icon, title, fullPrice, discountedPrice, active, on
   </div>
 );
 
-const StepService = ({ data, updateData, onEnterpriseSelect }) => {
-  const showDiscount = data.advance_immediate === true;
+const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) => {
+  const showDiscount = !!currentClient || data.advance_immediate === true;
   return (
   <div className="space-y-6">
     <div className="text-center mb-8">
@@ -768,7 +768,7 @@ export default function BookingPage() {
             {/* Common steps */}
             {step === 1 && !currentClient && <StepAddress data={bookingData} updateData={updateData} errors={errors} onOutOfZone={() => setStep(1)} />}
             {step === 2 && !currentClient?.urssaf_completed && !(currentClient?.urssaf_status && currentClient.urssaf_status !== 'none') && <StepAdvance data={bookingData} updateData={updateData} />}
-            {step === 3 && <StepService data={bookingData} updateData={updateData} onEnterpriseSelect={() => setShowEnterpriseDialog(true)} />}
+            {step === 3 && <StepService data={bookingData} updateData={updateData} currentClient={currentClient} onEnterpriseSelect={() => setShowEnterpriseDialog(true)} />}
             
             {/* Fallback: si step >= 4 et service_type vide, revenir à l'étape 3 */}
             {step >= 4 && !bookingData.service_type && (
