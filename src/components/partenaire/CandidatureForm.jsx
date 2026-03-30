@@ -5,34 +5,44 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 const STEPS = [
   { label: "C'est parti !", number: 1 },
-  { label: "Informations personnelles", number: 2 },
-  { label: "Expérience professionnelle", number: 3 },
+  { label: 'Informations personnelles', number: 2 },
+  { label: 'Expérience professionnelle', number: 3 },
 ];
 
 const StepIndicator = ({ currentStep }) => (
-  <div className="flex items-center justify-center gap-0 mb-10">
+  <div className="mb-10 flex items-center justify-center gap-0">
     {STEPS.map((step, i) => {
       const done = step.number < currentStep;
       const active = step.number === currentStep;
       return (
         <React.Fragment key={step.number}>
           <div className="flex flex-col items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
-              done ? 'bg-[#E95678] border-[#E95678] text-white' :
-              active ? 'bg-[#E95678] border-[#E95678] text-white' :
-              'bg-white border-slate-300 text-slate-400'
-            }`}>
-              {done ? <CheckCircle2 className="w-4 h-4" /> : step.number}
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition-all ${
+                done || active
+                  ? 'border-[#E95678] bg-[#E95678] text-white'
+                  : 'border-slate-300 bg-white text-slate-400'
+              }`}
+            >
+              {done ? <CheckCircle2 className="h-4 w-4" /> : step.number}
             </div>
-            <span className={`text-xs mt-1 font-medium text-center max-w-[90px] ${active ? 'text-[#E95678]' : done ? 'text-[#E95678]' : 'text-slate-400'}`}>
+            <span
+              className={`mt-1 max-w-[90px] text-center text-xs font-medium ${
+                active || done ? 'text-[#E95678]' : 'text-slate-400'
+              }`}
+            >
               {step.label}
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`flex-1 h-0.5 mx-2 mb-5 ${done ? 'bg-[#E95678]' : 'bg-slate-200'}`} style={{minWidth: 40}} />
+            <div
+              className={`mx-2 mb-5 h-0.5 flex-1 ${done ? 'bg-[#E95678]' : 'bg-slate-200'}`}
+              style={{ minWidth: 40 }}
+            />
           )}
         </React.Fragment>
       );
@@ -45,6 +55,9 @@ export default function CandidatureForm({ onSuccess }) {
   const [accepted, setAccepted] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
   const [form, setForm] = useState({
     email: '',
     civilite: 'Mme',
@@ -62,83 +75,104 @@ export default function CandidatureForm({ onSuccess }) {
     cv_url: '',
   });
 
-  const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
+  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   const toggleLieu = (lieu) => {
-    setForm(f => ({
+    setForm((f) => ({
       ...f,
       lieux_experience: f.lieux_experience.includes(lieu)
-        ? f.lieux_experience.filter(l => l !== lieu)
-        : [...f.lieux_experience, lieu]
+        ? f.lieux_experience.filter((l) => l !== lieu)
+        : [...f.lieux_experience, lieu],
     }));
   };
 
   const handleCVUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    set('cv_url', file_url);
-    setUploading(false);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set('cv_url', file_url);
+      toast.success('CV ajouté avec succès.');
+    } catch (error) {
+      console.error('CV upload error:', error);
+      toast.error("Impossible d'ajouter le CV pour le moment.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const [submitted, setSubmitted] = useState(false);
-
   const handleSubmit = async () => {
+    setSubmitError('');
     setSubmitting(true);
-    await base44.entities.Candidature.create({
-      ...form,
-      status: 'pending',
-    });
-    setSubmitting(false);
-    setSubmitted(true);
+
+    try {
+      await base44.entities.Candidature.create({
+        ...form,
+        status: 'pending',
+      });
+      setSubmitted(true);
+      onSuccess?.();
+      toast.success('Votre candidature a bien été envoyée.');
+    } catch (error) {
+      console.error('Candidature submit error:', error);
+      const message =
+        error?.message?.includes('row-level security')
+          ? "La base Supabase n'est pas encore configurée pour recevoir les candidatures."
+          : error?.message || "Impossible d'envoyer la candidature pour le moment.";
+      setSubmitError(message);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
-      <div className="w-full max-w-lg mx-auto text-center py-8">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-9 h-9 text-green-500" />
+      <div className="mx-auto w-full max-w-lg py-8 text-center">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <CheckCircle2 className="h-9 w-9 text-green-500" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">Merci pour votre candidature !</h2>
-        <p className="text-slate-600 mb-2">
-          Nous avons bien reçu votre dossier, <strong>{form.first_name}</strong> 🎉
+        <h2 className="mb-3 text-2xl font-bold text-slate-900">Merci pour votre candidature !</h2>
+        <p className="mb-2 text-slate-600">
+          Nous avons bien reçu votre dossier, <strong>{form.first_name}</strong>.
         </p>
-        <p className="text-slate-500 text-sm leading-relaxed">
-          Notre équipe va l'examiner avec attention et vous recontactera très prochainement par email ou par téléphone pour faire connaissance et vous présenter les prochaines étapes.
+        <p className="text-sm leading-relaxed text-slate-500">
+          Notre équipe va l'examiner avec attention et vous recontactera très prochainement par email ou par téléphone pour vous présenter les prochaines étapes.
         </p>
-        <p className="text-xs text-slate-400 mt-6">À très bientôt chez Naky 💚</p>
+        <p className="mt-6 text-xs text-slate-400">À très bientôt chez Naky.</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="mx-auto w-full max-w-lg">
       <StepIndicator currentStep={step} />
 
       {step === 1 && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Quelle est votre adresse email ?</h2>
-            <p className="text-sm text-slate-500">Nous utilisons votre email uniquement pour vous contacter, pas d'envoi de spam.</p>
+            <h2 className="mb-2 text-2xl font-bold text-slate-900">Quelle est votre adresse email ?</h2>
+            <p className="text-sm text-slate-500">Nous utilisons votre email uniquement pour vous contacter, sans spam.</p>
           </div>
           <Input
             type="email"
             placeholder="Votre email"
             value={form.email}
-            onChange={e => set('email', e.target.value)}
+            onChange={(e) => set('email', e.target.value)}
             className="h-12 text-base"
           />
           <div className="flex items-center gap-3">
             <Checkbox id="cgu" checked={accepted} onCheckedChange={setAccepted} />
-            <label htmlFor="cgu" className="text-sm text-slate-600 cursor-pointer">
+            <label htmlFor="cgu" className="cursor-pointer text-sm text-slate-600">
               J'accepte les <span className="text-[#E95678] underline">conditions d'utilisation</span>
             </label>
           </div>
           <Button
             onClick={() => setStep(2)}
             disabled={!form.email || !accepted}
-            className="w-full h-12 bg-[#E95678] hover:bg-[#d44565] text-white text-base font-semibold"
+            className="h-12 w-full bg-[#E95678] text-base font-semibold text-white hover:bg-[#d44565]"
           >
             Suivant
           </Button>
@@ -152,8 +186,8 @@ export default function CandidatureForm({ onSuccess }) {
             <Label>Titre</Label>
             <select
               value={form.civilite}
-              onChange={e => set('civilite', e.target.value)}
-              className="w-full h-12 border border-slate-200 rounded-md px-3 text-base bg-white"
+              onChange={(e) => set('civilite', e.target.value)}
+              className="h-12 w-full rounded-md border border-slate-200 bg-white px-3 text-base"
             >
               <option value="Mme">Madame</option>
               <option value="M">Monsieur</option>
@@ -161,34 +195,34 @@ export default function CandidatureForm({ onSuccess }) {
           </div>
           <div className="space-y-2">
             <Label>Prénom *</Label>
-            <Input placeholder="Prénom" value={form.first_name} onChange={e => set('first_name', e.target.value)} className="h-12" />
+            <Input placeholder="Prénom" value={form.first_name} onChange={(e) => set('first_name', e.target.value)} className="h-12" />
           </div>
           <div className="space-y-2">
             <Label>Nom de famille</Label>
-            <Input placeholder="Nom de famille" value={form.last_name} onChange={e => set('last_name', e.target.value)} className="h-12" />
+            <Input placeholder="Nom de famille" value={form.last_name} onChange={(e) => set('last_name', e.target.value)} className="h-12" />
           </div>
           <div className="space-y-2">
             <Label>Numéro de téléphone</Label>
-            <Input placeholder="Numéro de téléphone" value={form.phone} onChange={e => set('phone', e.target.value)} className="h-12" />
+            <Input placeholder="Numéro de téléphone" value={form.phone} onChange={(e) => set('phone', e.target.value)} className="h-12" />
           </div>
           <div className="space-y-2">
             <Label>Adresse</Label>
-            <Input placeholder="Nom de rue" value={form.address} onChange={e => set('address', e.target.value)} className="h-12" />
+            <Input placeholder="Nom de rue" value={form.address} onChange={(e) => set('address', e.target.value)} className="h-12" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Code postal</Label>
-              <Input placeholder="Code postal" value={form.zipcode} onChange={e => set('zipcode', e.target.value)} className="h-12" />
+              <Input placeholder="Code postal" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className="h-12" />
             </div>
             <div className="space-y-2">
               <Label>Ville</Label>
-              <Input placeholder="Ville" value={form.city} onChange={e => set('city', e.target.value)} className="h-12" />
+              <Input placeholder="Ville" value={form.city} onChange={(e) => set('city', e.target.value)} className="h-12" />
             </div>
           </div>
           <Button
             onClick={() => setStep(3)}
             disabled={!form.first_name}
-            className="w-full h-12 bg-[#E95678] hover:bg-[#d44565] text-white text-base font-semibold"
+            className="h-12 w-full bg-[#E95678] text-base font-semibold text-white hover:bg-[#d44565]"
           >
             Suivant
           </Button>
@@ -197,9 +231,8 @@ export default function CandidatureForm({ onSuccess }) {
 
       {step === 3 && (
         <div className="space-y-8">
-          {/* Permis de séjour */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">De quel permis de séjour disposez-vous ?</h3>
+            <h3 className="mb-4 text-lg font-bold text-slate-900">De quel permis de séjour disposez-vous ?</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: 'francaise', label: 'Nationalité française' },
@@ -207,12 +240,15 @@ export default function CandidatureForm({ onSuccess }) {
                 { value: 'europeenne', label: 'Citoyenneté européenne' },
                 { value: 'aucun', label: 'Aucun permis de travail' },
                 { value: 'titre_residence', label: 'Titre de résidence' },
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="permis" value={opt.value}
+              ].map((opt) => (
+                <label key={opt.value} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="radio"
+                    name="permis"
+                    value={opt.value}
                     checked={form.permis_sejour === opt.value}
                     onChange={() => set('permis_sejour', opt.value)}
-                    className="accent-[#E95678] w-4 h-4"
+                    className="h-4 w-4 accent-[#E95678]"
                   />
                   <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
@@ -220,20 +256,22 @@ export default function CandidatureForm({ onSuccess }) {
             </div>
           </div>
 
-          {/* Heures par semaine */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Combien d'heures aimeriez-vous travailler par semaine ?</h3>
+            <h3 className="mb-4 text-lg font-bold text-slate-900">Combien d'heures aimeriez-vous travailler par semaine ?</h3>
             <div className="space-y-3">
               {[
                 { value: '5-15', label: '5-15 heures par semaine' },
                 { value: '15-30', label: '15-30 heures par semaine' },
                 { value: '31-35', label: '31-35 heures par semaine' },
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="heures" value={opt.value}
+              ].map((opt) => (
+                <label key={opt.value} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="radio"
+                    name="heures"
+                    value={opt.value}
                     checked={form.heures_semaine === opt.value}
                     onChange={() => set('heures_semaine', opt.value)}
-                    className="accent-[#E95678] w-4 h-4"
+                    className="h-4 w-4 accent-[#E95678]"
                   />
                   <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
@@ -241,21 +279,23 @@ export default function CandidatureForm({ onSuccess }) {
             </div>
           </div>
 
-          {/* Années d'expérience */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Combien d'années d'expérience avez-vous ?</h3>
+            <h3 className="mb-4 text-lg font-bold text-slate-900">Combien d'années d'expérience avez-vous ?</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: 'aucune', label: 'Aucune' },
                 { value: 'plus_2ans', label: 'Plus de 2 ans' },
                 { value: 'moins_2ans', label: 'Moins de 2 ans' },
                 { value: 'plus_5ans', label: 'Plus de 5 ans' },
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="experience" value={opt.value}
+              ].map((opt) => (
+                <label key={opt.value} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="radio"
+                    name="experience"
+                    value={opt.value}
                     checked={form.annees_experience === opt.value}
                     onChange={() => set('annees_experience', opt.value)}
-                    className="accent-[#E95678] w-4 h-4"
+                    className="h-4 w-4 accent-[#E95678]"
                   />
                   <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
@@ -263,40 +303,35 @@ export default function CandidatureForm({ onSuccess }) {
             </div>
           </div>
 
-          {/* Lieux d'expérience */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Où avez-vous acquis votre expérience ?</h3>
+            <h3 className="mb-4 text-lg font-bold text-slate-900">Où avez-vous acquis votre expérience ?</h3>
             <div className="grid grid-cols-2 gap-3">
-              {[
-                'Maisons / Appartements', 'Clinique / Hôpital',
-                'Hôtels / Restaurants', 'Bureaux',
-              ].map(lieu => (
-                <label key={lieu} className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={form.lieux_experience.includes(lieu)}
-                    onCheckedChange={() => toggleLieu(lieu)}
-                  />
+              {['Maisons / Appartements', 'Clinique / Hôpital', 'Hôtels / Restaurants', 'Bureaux'].map((lieu) => (
+                <label key={lieu} className="flex cursor-pointer items-center gap-3">
+                  <Checkbox checked={form.lieux_experience.includes(lieu)} onCheckedChange={() => toggleLieu(lieu)} />
                   <span className="text-sm text-slate-700">{lieu}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Véhicule */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Disposez-vous d'un véhicule ?</h3>
+            <h3 className="mb-4 text-lg font-bold text-slate-900">Disposez-vous d'un véhicule ?</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { value: 'voiture', label: 'Oui, une voiture' },
                 { value: 'velo', label: 'Oui, un vélo' },
                 { value: 'scooter', label: 'Oui, un scooter' },
                 { value: 'non', label: 'Non' },
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="vehicule" value={opt.value}
+              ].map((opt) => (
+                <label key={opt.value} className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="radio"
+                    name="vehicule"
+                    value={opt.value}
                     checked={form.vehicule === opt.value}
                     onChange={() => set('vehicule', opt.value)}
-                    className="accent-[#E95678] w-4 h-4"
+                    className="h-4 w-4 accent-[#E95678]"
                   />
                   <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
@@ -304,23 +339,22 @@ export default function CandidatureForm({ onSuccess }) {
             </div>
           </div>
 
-          {/* CV Upload */}
           <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="mb-2 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900">Déposez votre CV pour augmenter vos chances d'être contacté(e).</h3>
               <span className="text-sm text-slate-400">(optionnel)</span>
             </div>
-            <label className="block border-2 border-dashed border-slate-200 rounded-lg p-8 text-center cursor-pointer hover:border-[#E95678] transition-colors bg-slate-50">
+            <label className="block cursor-pointer rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center transition-colors hover:border-[#E95678]">
               <input type="file" accept=".pdf,.doc,.docx" onChange={handleCVUpload} className="hidden" />
-              <Upload className="w-8 h-8 mx-auto mb-3 text-slate-400" />
+              <Upload className="mx-auto mb-3 h-8 w-8 text-slate-400" />
               {form.cv_url ? (
-                <p className="text-green-600 font-medium text-sm">✓ CV uploadé avec succès</p>
+                <p className="text-sm font-medium text-green-600">CV uploadé avec succès</p>
               ) : uploading ? (
-                <p className="text-slate-500 text-sm">Upload en cours...</p>
+                <p className="text-sm text-slate-500">Upload en cours...</p>
               ) : (
                 <>
-                  <p className="text-[#E95678] font-medium text-sm">Parcourir les fichiers</p>
-                  <p className="text-slate-400 text-xs mt-1">Glissez et déposez des fichiers ici</p>
+                  <p className="text-sm font-medium text-[#E95678]">Parcourir les fichiers</p>
+                  <p className="mt-1 text-xs text-slate-400">Glissez et déposez des fichiers ici</p>
                 </>
               )}
             </label>
@@ -329,10 +363,12 @@ export default function CandidatureForm({ onSuccess }) {
           <Button
             onClick={handleSubmit}
             disabled={submitting || uploading}
-            className="w-full h-12 bg-[#E95678] hover:bg-[#d44565] text-white text-base font-semibold"
+            className="h-12 w-full bg-[#E95678] text-base font-semibold text-white hover:bg-[#d44565]"
           >
             {submitting ? 'Envoi en cours...' : 'Envoyer mes réponses'}
           </Button>
+
+          {submitError ? <p className="text-sm text-red-500">{submitError}</p> : null}
         </div>
       )}
     </div>
