@@ -13,6 +13,7 @@ import Booking from './pages/Booking';
 import BookingConfirmation from './pages/BookingConfirmation';
 import Connexion from './pages/Connexion';
 import Inscription from './pages/Inscription';
+import ResetPassword from './pages/ResetPassword';
 import UserDashboard from './pages/UserDashboard';
 import UrssafForm from './pages/UrssafForm';
 import Admin from './pages/Admin';
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/reservation/confirmee" element={<Layout><BookingConfirmation /></Layout>} />
       <Route path="/connexion" element={<Layout><Connexion /></Layout>} />
       <Route path="/inscription" element={<Layout><Inscription /></Layout>} />
+      <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
       <Route path="/compte" element={<Layout><UserDashboard /></Layout>} />
       <Route path="/urssaf" element={<Layout><UrssafForm /></Layout>} />
       <Route path="/admin" element={<Admin />} />
@@ -61,6 +63,7 @@ function AppRoutes() {
       <Route path="/BookingConfirmation" element={<Navigate to="/reservation/confirmee" replace />} />
       <Route path="/Connexion" element={<Navigate to="/connexion" replace />} />
       <Route path="/Inscription" element={<Navigate to="/inscription" replace />} />
+      <Route path="/ResetPassword" element={<Navigate to="/reset-password" replace />} />
       <Route path="/UserDashboard" element={<Navigate to="/compte" replace />} />
       <Route path="/UrssafForm" element={<Navigate to="/urssaf" replace />} />
       <Route path="/Admin" element={<Navigate to="/admin" replace />} />
