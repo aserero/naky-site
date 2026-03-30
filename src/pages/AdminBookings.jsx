@@ -276,8 +276,13 @@ export default function AdminBookings() {
       const byteArray = new Uint8Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
       const pdfFile = new File([byteArray], `facture-${booking.id}.pdf`, { type: 'application/pdf' });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
-      invoiceFileUrl = file_url;
+      const uploadFile = base44.integrations?.Core?.UploadFile;
+      if (uploadFile) {
+        const { file_url } = await uploadFile({ file: pdfFile });
+        invoiceFileUrl = file_url;
+      } else {
+        console.warn('Invoice PDF generated but no upload integration is configured yet.');
+      }
     }
 
     // Mettre à jour le booking

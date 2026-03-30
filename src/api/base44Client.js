@@ -25,6 +25,10 @@ const clientColumnMap = {
   account_holder: 'account_holder',
   active: 'active',
   urssaf_payload: 'urssaf_payload',
+  stripe_payment_method_id: 'stripe_payment_method_id',
+  stripe_customer_id: 'stripe_customer_id',
+  idAbby: 'idabby',
+  idabby: 'idabby',
 };
 
 const reservationColumnMap = {
@@ -78,6 +82,22 @@ const invoiceColumnMap = {
 
 function uuid() {
   return globalThis.crypto?.randomUUID?.() || `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function invokeSupabaseFunction(name, payload = {}) {
+  const { data, error } = await supabase.functions.invoke(name, {
+    body: payload,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  return { data };
 }
 
 function normalizeClient(row = {}) {
@@ -378,7 +398,19 @@ export const base44 = {
       }
 
       if (name === 'getStripePublishableKey') {
-        return { data: { key: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '' } };
+        const envKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+        if (envKey) {
+          return { data: { key: envKey } };
+        }
+        return invokeSupabaseFunction('get-stripe-publishable-key', payload);
+      }
+
+      if (name === 'createStripeSetupIntent') {
+        return invokeSupabaseFunction('create-stripe-setup-intent', payload);
+      }
+
+      if (name === 'chargeClient') {
+        return invokeSupabaseFunction('charge-client', payload);
       }
 
       if (name === 'sendBookingNotification' || name === 'sendUrssafWebhook' || name === 'sendEnterpriseRequest') {

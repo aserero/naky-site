@@ -628,7 +628,10 @@ export default function BookingPage() {
                 zipcode: bookingData.zipcode,
                 city: bookingData.city,
                 status: 'active',
-                ...(stripePaymentMethodId ? { stripe_payment_method_id: stripePaymentMethodId } : {})
+                ...(stripePaymentMethodId ? {
+                  stripe_payment_method_id: stripePaymentMethodId,
+                  stripe_customer_id: stripeSetupInfo?.customerId || null,
+                } : {})
             });
             clientId = newClient.id;
 
@@ -662,6 +665,7 @@ export default function BookingPage() {
             }
             if (stripePaymentMethodId && !currentClient.stripe_payment_method_id) {
               clientUpdates.stripe_payment_method_id = stripePaymentMethodId;
+              clientUpdates.stripe_customer_id = stripeSetupInfo?.customerId || currentClient.stripe_customer_id || null;
             }
             // Si le client vient de demander l'avance immédiate pour la première fois
             if (bookingData.advance_immediate === true && (!currentClient.urssaf_status || currentClient.urssaf_status === 'none')) {
