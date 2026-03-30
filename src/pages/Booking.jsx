@@ -24,7 +24,7 @@ import { useAuth } from '@/components/AuthContext';
 
 // StepAddress imported
 
-const StepAdvance = ({ data, updateData }) => (
+const StepAdvance = ({ data, onSelect }) => (
   <div className="space-y-6">
     <div className="text-center mb-8">
       <h2 className="text-2xl font-bold text-slate-900 mb-2">Souhaitez-vous bénéficier de l'avance immédiate ?</h2>
@@ -32,13 +32,13 @@ const StepAdvance = ({ data, updateData }) => (
     </div>
     <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
       <button
-        onClick={() => updateData({ advance_immediate: true })}
+        onClick={() => onSelect({ advance_immediate: true })}
         className={`h-16 rounded-xl border-2 transition-all font-medium ${data.advance_immediate === true ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         Oui
       </button>
       <button
-        onClick={() => updateData({ advance_immediate: false })}
+        onClick={() => onSelect({ advance_immediate: false })}
         className={`h-16 rounded-xl border-2 transition-all font-medium ${data.advance_immediate === false ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         Non
@@ -99,7 +99,7 @@ const ServiceCard = ({ icon: Icon, title, fullPrice, discountedPrice, active, on
   </div>
 );
 
-const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) => {
+const StepService = ({ data, onSelect, onEnterpriseSelect, currentClient }) => {
   const showDiscount = !!currentClient || data.advance_immediate === true;
   return (
   <div className="space-y-6">
@@ -115,7 +115,7 @@ const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) =>
         discountedPrice="13"
         showDiscount={showDiscount}
         active={data.service_type === 'regular'}
-        onClick={() => updateData({ service_type: 'regular', recurrence: data.recurrence || 'weekly' })}
+        onClick={() => onSelect({ service_type: 'regular', recurrence: data.recurrence || 'weekly' })}
       />
       <ServiceCard 
         icon={Clock}
@@ -124,7 +124,7 @@ const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) =>
         discountedPrice="14.5"
         showDiscount={showDiscount}
         active={data.service_type === 'one_time'}
-        onClick={() => updateData({ service_type: 'one_time', recurrence: 'none' })}
+        onClick={() => onSelect({ service_type: 'one_time', recurrence: 'none' })}
       />
       <ServiceCard 
         icon={Home}
@@ -133,7 +133,7 @@ const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) =>
         discountedPrice="16"
         showDiscount={showDiscount}
         active={data.service_type === 'spring'}
-        onClick={() => updateData({ service_type: 'spring', recurrence: 'none' })}
+        onClick={() => onSelect({ service_type: 'spring', recurrence: 'none' })}
       />
        <ServiceCard 
         icon={Building2}
@@ -146,7 +146,7 @@ const StepService = ({ data, updateData, onEnterpriseSelect, currentClient }) =>
   );
 };
 
-const StepFrequency = ({ data, updateData }) => (
+const StepFrequency = ({ data, onSelect }) => (
   <div className="space-y-6">
     <div className="text-center mb-8">
       <h2 className="text-2xl font-bold text-slate-900 mb-2">À quelle fréquence ?</h2>
@@ -154,7 +154,7 @@ const StepFrequency = ({ data, updateData }) => (
     </div>
     <div className="space-y-4 max-w-md mx-auto">
       <button
-        onClick={() => updateData({ recurrence: 'weekly' })}
+        onClick={() => onSelect({ recurrence: 'weekly' })}
         className={`w-full py-4 rounded-xl border-2 transition-all font-medium relative ${data.recurrence === 'weekly' ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         <span>1 fois par semaine</span>
@@ -163,19 +163,19 @@ const StepFrequency = ({ data, updateData }) => (
         </span>
       </button>
       <button
-        onClick={() => updateData({ recurrence: 'twice_weekly' })}
+        onClick={() => onSelect({ recurrence: 'twice_weekly' })}
         className={`w-full py-4 rounded-xl border-2 transition-all font-medium ${data.recurrence === 'twice_weekly' ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         2 fois par semaine
       </button>
       <button
-        onClick={() => updateData({ recurrence: 'biweekly' })}
+        onClick={() => onSelect({ recurrence: 'biweekly' })}
         className={`w-full py-4 rounded-xl border-2 transition-all font-medium ${data.recurrence === 'biweekly' ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         1 fois toutes les deux semaines
       </button>
       <button
-        onClick={() => updateData({ recurrence: 'monthly' })}
+        onClick={() => onSelect({ recurrence: 'monthly' })}
         className={`w-full py-4 rounded-xl border-2 transition-all font-medium ${data.recurrence === 'monthly' ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         1 fois par mois
@@ -185,20 +185,20 @@ const StepFrequency = ({ data, updateData }) => (
   </div>
 );
 
-const StepAnimals = ({ data, updateData }) => (
+const StepAnimals = ({ data, onSelect }) => (
   <div className="space-y-6">
     <div className="text-center mb-8">
       <h2 className="text-2xl font-bold text-slate-900 mb-2">Possédez-vous des animaux ?</h2>
     </div>
     <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
       <button
-        onClick={() => updateData({ has_animals: true })}
+        onClick={() => onSelect({ has_animals: true })}
         className={`h-16 rounded-xl border-2 transition-all font-medium ${data.has_animals === true ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         Oui
       </button>
       <button
-        onClick={() => updateData({ has_animals: false })}
+        onClick={() => onSelect({ has_animals: false })}
         className={`h-16 rounded-xl border-2 transition-all font-medium ${data.has_animals === false ? 'border-[#E95678] bg-[#FFF0F3] text-[#E95678]' : 'border-slate-200 bg-white hover:border-[#E95678]/50'}`}
       >
         Non
@@ -220,7 +220,7 @@ const durationDescriptions = {
   "7h": "Grand ménage de tout le logement"
 };
 
-const StepDuration = ({ data, updateData }) => {
+const StepDuration = ({ data, onSelect }) => {
   const durations = ["2h", "2h30", "3h", "3h30", "4h", "4h30", "5h", "5h30", "6h", "7h"];
   return (
     <div className="space-y-6">
@@ -232,7 +232,7 @@ const StepDuration = ({ data, updateData }) => {
         {durations.map(d => (
           <button
             key={d}
-            onClick={() => updateData({ duration: d })}
+            onClick={() => onSelect({ duration: d })}
             className={`py-3 rounded-xl border transition-all font-medium ${data.duration === d ? 'border-[#E95678] bg-white ring-2 ring-[#E95678] text-[#E95678]' : 'border-white bg-white hover:bg-slate-50'}`}
           >
             {d}
@@ -244,7 +244,7 @@ const StepDuration = ({ data, updateData }) => {
   );
 };
 
-const StepTime = ({ data, updateData }) => {
+const StepTime = ({ data, onSelect }) => {
   const times = ["8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h"];
   return (
     <div className="space-y-6">
@@ -256,7 +256,7 @@ const StepTime = ({ data, updateData }) => {
         {times.map(t => (
           <button
             key={t}
-            onClick={() => updateData({ time: t })}
+            onClick={() => onSelect({ time: t })}
             className={`py-3 rounded-xl border transition-all font-medium ${data.time === t ? 'border-[#E95678] bg-white ring-2 ring-[#E95678] text-[#E95678]' : 'border-white bg-white hover:bg-slate-50'}`}
           >
             {t}
@@ -373,6 +373,43 @@ export default function BookingPage() {
   const updateData = (newData) => {
     setBookingData(prev => ({ ...prev, ...newData }));
     setErrors({}); // Clear errors on change
+  };
+
+  const getMaxStepForData = (dataSnapshot) => {
+    if (currentClient) {
+      return 8;
+    }
+    if (dataSnapshot.service_type === 'regular') return 10;
+    return 9;
+  };
+
+  const getNextStepForData = (currentStep, dataSnapshot) => {
+    let nextStep = currentStep + 1;
+    const urssafAlreadyHandled = currentClient?.urssaf_completed || (currentClient?.urssaf_status && currentClient.urssaf_status !== 'none');
+
+    if (currentClient) {
+      if (currentStep === 1) nextStep = urssafAlreadyHandled ? 3 : 2;
+      if (currentStep === 2 && urssafAlreadyHandled) nextStep = 3;
+      if (currentStep === 3 && dataSnapshot.service_type === 'regular') nextStep = 4;
+      if (currentStep === 3 && dataSnapshot.service_type !== 'regular') nextStep = 5;
+      if (currentStep === 4 && dataSnapshot.service_type === 'regular') nextStep = 5;
+      if (currentStep === 5 && dataSnapshot.service_type === 'regular') nextStep = 6;
+      if (currentStep === 5 && dataSnapshot.service_type !== 'regular') nextStep = 6;
+      if (currentStep === 6) nextStep = 7;
+      if (currentStep === 7) nextStep = 8;
+    }
+
+    return Math.min(nextStep, getMaxStepForData(dataSnapshot));
+  };
+
+  const handleChoiceAndAdvance = (newData) => {
+    const nextData = { ...bookingData, ...newData };
+    updateData(newData);
+    const nextStep = getNextStepForData(step, nextData);
+    window.setTimeout(() => {
+      setStep(nextStep);
+      window.scrollTo(0, 0);
+    }, 0);
   };
 
   const getStepNumber = (logicalStep) => {
@@ -714,7 +751,7 @@ export default function BookingPage() {
         
     } catch (error) {
         console.error('Error in createBookingAndSetupPayment:', error);
-        toast.error("Une erreur est survenue lors de la création de la réservation.");
+        toast.error(error?.message || "Une erreur est survenue lors de la création de la réservation.");
         throw error;
     }
   };
@@ -768,8 +805,8 @@ export default function BookingPage() {
           >
             {/* Common steps */}
             {step === 1 && !currentClient && <StepAddress data={bookingData} updateData={updateData} errors={errors} onOutOfZone={() => setStep(1)} />}
-            {step === 2 && !currentClient?.urssaf_completed && !(currentClient?.urssaf_status && currentClient.urssaf_status !== 'none') && <StepAdvance data={bookingData} updateData={updateData} />}
-            {step === 3 && <StepService data={bookingData} updateData={updateData} currentClient={currentClient} onEnterpriseSelect={() => setShowEnterpriseDialog(true)} />}
+            {step === 2 && !currentClient?.urssaf_completed && !(currentClient?.urssaf_status && currentClient.urssaf_status !== 'none') && <StepAdvance data={bookingData} onSelect={handleChoiceAndAdvance} />}
+            {step === 3 && <StepService data={bookingData} onSelect={handleChoiceAndAdvance} currentClient={currentClient} onEnterpriseSelect={() => setShowEnterpriseDialog(true)} />}
             
             {/* Fallback: si step >= 4 et service_type vide, revenir à l'étape 3 */}
             {step >= 4 && !bookingData.service_type && (
@@ -780,32 +817,32 @@ export default function BookingPage() {
             )}
 
             {/* Regular service - Logged in user */}
-            {step === 4 && bookingData.service_type === 'regular' && currentClient && <StepFrequency data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 5 && bookingData.service_type === 'regular' && currentClient && <StepDuration data={bookingData} updateData={updateData} />}
+            {step === 4 && bookingData.service_type === 'regular' && currentClient && <StepFrequency data={bookingData} onSelect={handleChoiceAndAdvance} errors={errors} />}
+            {step === 5 && bookingData.service_type === 'regular' && currentClient && <StepDuration data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 6 && bookingData.service_type === 'regular' && currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 7 && bookingData.service_type === 'regular' && currentClient && <StepTime data={bookingData} updateData={updateData} />}
+            {step === 7 && bookingData.service_type === 'regular' && currentClient && <StepTime data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 8 && bookingData.service_type === 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Regular service - Not logged in */}
-            {step === 4 && bookingData.service_type === 'regular' && !currentClient && <StepFrequency data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 5 && bookingData.service_type === 'regular' && !currentClient && <StepAnimals data={bookingData} updateData={updateData} />}
-            {step === 6 && bookingData.service_type === 'regular' && !currentClient && <StepDuration data={bookingData} updateData={updateData} />}
+            {step === 4 && bookingData.service_type === 'regular' && !currentClient && <StepFrequency data={bookingData} onSelect={handleChoiceAndAdvance} errors={errors} />}
+            {step === 5 && bookingData.service_type === 'regular' && !currentClient && <StepAnimals data={bookingData} onSelect={handleChoiceAndAdvance} />}
+            {step === 6 && bookingData.service_type === 'regular' && !currentClient && <StepDuration data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 7 && bookingData.service_type === 'regular' && !currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 8 && bookingData.service_type === 'regular' && !currentClient && <StepTime data={bookingData} updateData={updateData} />}
+            {step === 8 && bookingData.service_type === 'regular' && !currentClient && <StepTime data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 9 && bookingData.service_type === 'regular' && !currentClient && <StepIdentity data={bookingData} updateData={updateData} onLoginClick={() => window.location.href = createPageUrl('Connexion')} errors={errors} />}
             {step === 10 && bookingData.service_type === 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Non-regular service - Logged in user */}
-            {step === 5 && bookingData.service_type !== 'regular' && currentClient && <StepDuration data={bookingData} updateData={updateData} />}
+            {step === 5 && bookingData.service_type !== 'regular' && currentClient && <StepDuration data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 6 && bookingData.service_type !== 'regular' && currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 7 && bookingData.service_type !== 'regular' && currentClient && <StepTime data={bookingData} updateData={updateData} />}
+            {step === 7 && bookingData.service_type !== 'regular' && currentClient && <StepTime data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 8 && bookingData.service_type !== 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Non-regular service - Not logged in */}
-            {step === 4 && bookingData.service_type !== 'regular' && !currentClient && <StepAnimals data={bookingData} updateData={updateData} />}
-            {step === 5 && bookingData.service_type !== 'regular' && !currentClient && <StepDuration data={bookingData} updateData={updateData} />}
+            {step === 4 && bookingData.service_type !== 'regular' && !currentClient && <StepAnimals data={bookingData} onSelect={handleChoiceAndAdvance} />}
+            {step === 5 && bookingData.service_type !== 'regular' && !currentClient && <StepDuration data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 6 && bookingData.service_type !== 'regular' && !currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
-            {step === 7 && bookingData.service_type !== 'regular' && !currentClient && <StepTime data={bookingData} updateData={updateData} />}
+            {step === 7 && bookingData.service_type !== 'regular' && !currentClient && <StepTime data={bookingData} onSelect={handleChoiceAndAdvance} />}
             {step === 8 && bookingData.service_type !== 'regular' && !currentClient && <StepIdentity data={bookingData} updateData={updateData} onLoginClick={() => window.location.href = createPageUrl('Connexion')} errors={errors} />}
             {step === 9 && bookingData.service_type !== 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
           </motion.div>

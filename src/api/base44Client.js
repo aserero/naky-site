@@ -289,7 +289,6 @@ function mapBookingForDb(input = {}) {
   output.has_pets = input.has_animals ?? input.has_pets ?? false;
   output.has_equipment = input.has_cleaning_supplies ?? input.has_equipment ?? false;
   output.payment_status = input.billing_status === 'paid' ? 'paid' : 'unpaid';
-  output.urssaf_status = input.urssaf_status || null;
   return output;
 }
 
