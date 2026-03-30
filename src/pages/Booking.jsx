@@ -360,7 +360,8 @@ export default function BookingPage() {
   // Save state on change - only for logged-in users
   useEffect(() => {
     if (isLoaded && currentClient) {
-      localStorage.setItem('naky_booking_state', JSON.stringify({ data: bookingData, step }));
+      const { _stripeInstance, _stripeCard, _cardComplete, ...persistedBookingData } = bookingData;
+      localStorage.setItem('naky_booking_state', JSON.stringify({ data: persistedBookingData, step }));
     }
   }, [bookingData, step, isLoaded, currentClient]);
 
