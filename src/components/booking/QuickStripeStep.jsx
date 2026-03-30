@@ -6,6 +6,7 @@ export default function QuickStripeStep({ client, onUpdate, stripeRefs }) {
   const cardElementRef = useRef(null);
   const [loadingStripe, setLoadingStripe] = useState(true);
   const [cardError, setCardError] = useState('');
+  const [stripeInitError, setStripeInitError] = useState('');
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -26,7 +27,14 @@ export default function QuickStripeStep({ client, onUpdate, stripeRefs }) {
 
       // Get publishable key
       const keyRes = await base44.functions.invoke('getStripePublishableKey', {});
-      const stripe = window.Stripe(keyRes.data?.key);
+      const publishableKey = keyRes.data?.key;
+      if (!publishableKey) {
+        throw new Error("La clé Stripe n'est pas configurée.");
+      }
+      const stripe = window.Stripe(publishableKey);
+      if (!stripe) {
+        throw new Error("Impossible d'initialiser Stripe.");
+      }
 
       // Create SetupIntent
       const setupRes = await base44.functions.invoke('createStripeSetupIntent', {
@@ -34,6 +42,9 @@ export default function QuickStripeStep({ client, onUpdate, stripeRefs }) {
         clientName: `${client.first_name} ${client.last_name}`,
       });
       const { clientSecret, customerId } = setupRes.data;
+      if (!clientSecret) {
+        throw new Error("Impossible de préparer le formulaire carte.");
+      }
 
       // Store in parent refs
       if (stripeRefs) {
@@ -69,6 +80,7 @@ export default function QuickStripeStep({ client, onUpdate, stripeRefs }) {
 
     init().catch(err => {
       console.error('Stripe init error:', err);
+      setStripeInitError(err?.message || "Le formulaire de carte ne peut pas se charger pour le moment.");
       setLoadingStripe(false);
     });
   }, []);
@@ -95,11 +107,18 @@ export default function QuickStripeStep({ client, onUpdate, stripeRefs }) {
         )}
 
         {/* Always in DOM so Stripe can mount into it */}
-        <div
-          ref={cardElementRef}
-          className={`p-3 border border-slate-200 rounded-lg bg-white min-h-[44px] ${loadingStripe ? 'hidden' : ''}`}
-        />
+        {!stripeInitError && (
+          <div
+            ref={cardElementRef}
+            className={`p-3 border border-slate-200 rounded-lg bg-white min-h-[44px] ${loadingStripe ? 'hidden' : ''}`}
+          />
+        )}
 
+        {stripeInitError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+            {stripeInitError} Vérifie les clés Stripe et les fonctions Supabase.
+          </div>
+        )}
         {cardError && <p className="text-xs text-red-500">{cardError}</p>}
 
         <div className="flex items-center gap-1 text-xs text-slate-400 mt-2">

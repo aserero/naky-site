@@ -14,6 +14,7 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
   const [cardComplete, setCardComplete] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const [loadingStripe, setLoadingStripe] = useState(true);
+  const [stripeInitError, setStripeInitError] = useState('');
   const [showSuppliesDialog, setShowSuppliesDialog] = useState(false);
 
   // Load Stripe and create SetupIntent
@@ -32,7 +33,14 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
       const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
         (await base44.functions.invoke('getStripePublishableKey', {})).data?.key;
 
+      if (!publishableKey) {
+        throw new Error("La clé Stripe n'est pas configurée.");
+      }
+
       stripeRef.current = window.Stripe(publishableKey);
+      if (!stripeRef.current) {
+        throw new Error("Impossible d'initialiser Stripe.");
+      }
 
       const clientEmail = data.contact_details?.email || data.email || '';
       const clientName = `${data.contact_details?.first_name || data.first_name || ''} ${data.contact_details?.last_name || data.last_name || ''}`.trim();
@@ -43,6 +51,9 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
       });
 
       const { clientSecret: secret, customerId } = response.data;
+      if (!secret) {
+        throw new Error("Impossible de préparer le formulaire carte.");
+      }
       setClientSecret(secret);
 
       if (onCardReady) onCardReady({ customerId, setupClientSecret: secret });
@@ -52,6 +63,7 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
 
     initStripe().catch(err => {
       console.error('Stripe init error:', err);
+      setStripeInitError(err?.message || "Le formulaire de carte ne peut pas se charger pour le moment.");
       setLoadingStripe(false);
     });
 
@@ -137,11 +149,18 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
               <span className="text-sm text-slate-400">Chargement du formulaire de paiement...</span>
             </div>
           )}
-          <div
-            ref={cardElementRef}
-            className={`p-3 border border-slate-200 rounded-lg bg-white min-h-[44px] ${loadingStripe ? 'hidden' : ''}`}
-          />
+          {!stripeInitError && (
+            <div
+              ref={cardElementRef}
+              className={`p-3 border border-slate-200 rounded-lg bg-white min-h-[44px] ${loadingStripe ? 'hidden' : ''}`}
+            />
+          )}
 
+          {stripeInitError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+              {stripeInitError} Vérifie les clés Stripe et les fonctions Supabase.
+            </div>
+          )}
           {cardError && <p className="text-xs text-red-500 mt-2">{cardError}</p>}
           {errors._cardComplete && <p className="text-xs text-red-500 mt-2">{errors._cardComplete}</p>}
 
