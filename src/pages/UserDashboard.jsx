@@ -65,7 +65,7 @@ export default function UserDashboard() {
     onSuccess: (updatedClient) => {
       queryClient.invalidateQueries({ queryKey: ['bookings', currentClient?.id] });
       updateClient(updatedClient);
-      toast.success("Vos informations ont été mises à jour avec succès.");
+      toast.success("Vos informations ont �t� mises � jour avec succ�s.");
       setEditMode(false);
     }
   });
@@ -84,9 +84,9 @@ export default function UserDashboard() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending': return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-none">En attente</Badge>;
-      case 'confirmed': return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">Confirmé</Badge>;
-      case 'completed': return <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-none">Terminé</Badge>;
-      case 'cancelled': return <Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">Annulé</Badge>;
+      case 'confirmed': return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-none">Confirm�</Badge>;
+      case 'completed': return <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-none">Termin�</Badge>;
+      case 'cancelled': return <Badge className="bg-red-100 text-red-800 hover:bg-red-200 border-none">Annul�</Badge>;
       default: return null;
     }
   };
@@ -101,13 +101,13 @@ export default function UserDashboard() {
         <div className="flex items-center gap-3">
           <Link to={createPageUrl('Home')}>
             <Button variant="outline">
-              Retour Ã  l'accueil
+              Retour � l'accueil
             </Button>
           </Link>
           <Link to={createPageUrl('Booking')}>
             <Button className="bg-[#E95678] hover:bg-[#d44565] text-white">
           <Plus className="w-4 h-4 mr-2" />
-          Nouvelle réservation
+          Nouvelle r�servation
             </Button>
           </Link>
         </div>
@@ -126,7 +126,7 @@ export default function UserDashboard() {
             <form onSubmit={handleProfileUpdate} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Prénom</Label>
+                  <Label>Pr�nom</Label>
                   <Input value={profileData.first_name} onChange={(e) => setProfileData({...profileData, first_name: e.target.value})} disabled={currentClient.urssaf_completed} />
                 </div>
                 <div className="space-y-2">
@@ -134,7 +134,7 @@ export default function UserDashboard() {
                   <Input value={profileData.last_name} onChange={(e) => setProfileData({...profileData, last_name: e.target.value})} disabled={currentClient.urssaf_completed} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Téléphone</Label>
+                  <Label>T�l�phone</Label>
                   <Input value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} />
                 </div>
                 <div className="space-y-2">
@@ -164,7 +164,7 @@ export default function UserDashboard() {
               </div>
               {currentClient.urssaf_completed && (
                 <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded">
-                  Les informations liées à l'URSSAF ne peuvent plus être modifiées après validation.
+                  Les informations li�es à l'URSSAF ne peuvent plus �tre modifiées après validation.
                 </p>
               )}
               <div className="flex justify-end">
@@ -184,7 +184,7 @@ export default function UserDashboard() {
                 <p className="font-medium">{currentClient.email}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">Téléphone</p>
+                <p className="text-sm text-slate-500">T�l�phone</p>
                 <p className="font-medium">{currentClient.phone}</p>
               </div>
               <div>
@@ -196,7 +196,7 @@ export default function UserDashboard() {
                 <p className="font-medium">{currentClient.has_animals ? 'Oui' : 'Non'}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">URSSAF complété</p>
+                <p className="text-sm text-slate-500">URSSAF compl�t�</p>
                 <p className="font-medium flex items-center gap-1">
                   {currentClient.urssaf_completed ? (
                     <span className="text-green-600 flex items-center gap-1">
@@ -266,7 +266,7 @@ export default function UserDashboard() {
                     <h3 className="text-xl font-bold mb-2">✓ Avance Immédiate acceptée !</h3>
                     <p className="text-white/90">Votre demande d'avance immédiate a été acceptée par l'URSSAF. Vous bénéficiez du crédit d'impôt de 50% sur vos prochaines prestations.</p>
                   </div>
-                  <div className="bg-white/20 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Acceptée ✓</div>
+                  <div className="bg-white/20 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Accept�ee ✓</div>
                 </div>
               </CardContent>
             </Card>
@@ -282,7 +282,7 @@ export default function UserDashboard() {
                     <h3 className="text-xl font-bold mb-2 text-red-700">Avance Immédiate refusée</h3>
                     <p className="text-red-600">Votre demande d'avance immédiate a été refusée. Contactez-nous pour plus d'informations.</p>
                   </div>
-                  <div className="bg-red-200 text-red-700 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Refusée</div>
+                  <div className="bg-red-200 text-red-700 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Refus�ee</div>
                 </div>
               </CardContent>
             </Card>
@@ -298,7 +298,7 @@ export default function UserDashboard() {
                     <h3 className="text-xl font-bold mb-2 text-yellow-700">Avance Immédiate — Demande en cours</h3>
                     <p className="text-yellow-600">La demande d'avance immédiate a été soumise à l'URSSAF. Vous serez informé dès que votre dossier sera traité.</p>
                   </div>
-                  <div className="bg-yellow-200 text-yellow-700 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Demandée</div>
+                  <div className="bg-yellow-200 text-yellow-700 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap">AI Demand�ee</div>
                 </div>
               </CardContent>
             </Card>
@@ -306,7 +306,7 @@ export default function UserDashboard() {
         }
 
         if (urssafCompleted) {
-          // Dossier complété mais AI pas encore demandée
+          // Dossier compl�t� mais AI pas encore demandée
           return (
             <Card className="border-2 border-blue-200 bg-blue-50 shadow-sm">
               <CardContent className="p-6">
@@ -343,10 +343,10 @@ export default function UserDashboard() {
       })()}
 
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Vos réservations</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">Vos r�servations</h2>
         {bookings.length === 0 ? (
           <div className="text-center p-12 bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <p className="text-slate-500 mb-4">Vous n'avez pas encore de réservation.</p>
+            <p className="text-slate-500 mb-4">Vous n'avez pas encore de r�servation.</p>
             <Link to={createPageUrl('Booking')}>
               <Button className="bg-[#E95678] hover:bg-[#d44565] text-white">
                 Réserver un ménage
@@ -363,8 +363,8 @@ export default function UserDashboard() {
                       <div className="flex items-center gap-3">
                         {getStatusBadge(booking.status)}
                         <span className="font-semibold text-slate-900 capitalize">
-                          {booking.service_type === 'regular' ? 'Ménage régulier' : 
-                           booking.service_type === 'one_time' ? 'Ménage ponctuel' : 
+                          {booking.service_type === 'regular' ? 'M�nage r�gulier' : 
+                           booking.service_type === 'one_time' ? 'M�nage ponctuel' : 
                            booking.service_type === 'spring' ? 'Nettoyage de printemps' : 'Entreprise'}
                         </span>
                       </div>
@@ -372,11 +372,11 @@ export default function UserDashboard() {
                       <div className="flex items-center gap-4 text-sm text-slate-600">
                         <div className="flex items-center gap-1.5">
                           <CalendarIcon className="w-4 h-4 text-slate-400" />
-                          {booking.date ? format(parseISO(booking.date), 'dd MMMM yyyy', { locale: fr }) : 'Date non définie'}
+                          {booking.date ? format(parseISO(booking.date), 'dd MMMM yyyy', { locale: fr }) : 'Date non d�finiee'}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-4 h-4 text-slate-400" />
-                          {booking.time || 'Heure non définie'} ({booking.duration})
+                          {booking.time || 'Heure non d�finiee'} ({booking.duration})
                         </div>
                       </div>
 
@@ -401,9 +401,9 @@ export default function UserDashboard() {
                           <FileText className="w-3 h-3" />
                           URSSAF : {
                             booking.urssaf_status === 'pending' ? 'En attente' :
-                            booking.urssaf_status === 'requested' ? 'Demandé' :
-                            booking.urssaf_status === 'accepted' ? 'Accepté ✓' :
-                            'Refusé'
+                            booking.urssaf_status === 'requested' ? 'Demand�e' :
+                            booking.urssaf_status === 'accepted' ? 'Accept�e ✓' :
+                            'Refus�e'
                           }
                         </div>
                       )}
@@ -439,7 +439,7 @@ export default function UserDashboard() {
                         <a href={booking.invoice_file_url} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" variant="outline" className="gap-1.5 text-green-700 border-green-200 hover:bg-green-50">
                             <FileText className="w-3.5 h-3.5" />
-                            Télécharger ma facture
+                            T�l�charger ma facture
                           </Button>
                         </a>
                       )}
@@ -477,3 +477,4 @@ export default function UserDashboard() {
     </div>
   );
 }
+

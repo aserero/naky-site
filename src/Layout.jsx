@@ -29,10 +29,10 @@ function LayoutContent({ children }) {
   };
 
   return (
-    <div className="min-h-screen font-sans text-slate-900 bg-[#ECF5F0] flex flex-col">
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-1 flex justify-between items-center">
-          <Link to={createPageUrl('Home')} className="flex items-center flex-shrink-0">
+    <div className="flex min-h-screen flex-col bg-[#ECF5F0] font-sans text-slate-900">
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1">
+          <Link to={createPageUrl('Home')} className="flex flex-shrink-0 items-center">
             <img
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699ece5a2c48b8cfd3773f8a/23f22a7c8_logo_square.png"
               alt="Naky"
@@ -40,15 +40,15 @@ function LayoutContent({ children }) {
             />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                   location.pathname === link.path
-                    ? 'text-[#E95678] bg-[#E95678]/10'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-[#E95678]/10 text-[#E95678]'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 {link.label}
@@ -56,16 +56,16 @@ function LayoutContent({ children }) {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden items-center gap-3 md:flex">
             {currentClient ? (
               <>
                 <Link to={createPageUrl('Booking')}>
                   <Button variant="outline" className="rounded-full px-5 text-sm">
-                    RÃ©server
+                    Réserver
                   </Button>
                 </Link>
                 <Link to={createPageUrl('UserDashboard')}>
-                  <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-5 text-sm shadow-md">
+                  <Button className="rounded-full bg-[#E95678] px-5 text-sm text-white shadow-md hover:bg-[#d44565]">
                     Mon espace
                   </Button>
                 </Link>
@@ -77,17 +77,17 @@ function LayoutContent({ children }) {
                   </Link>
                 )}
                 <Button variant="ghost" size="icon" onClick={handleLogout} title="Se déconnecter">
-                  <LogOut className="w-4 h-4 text-slate-500" />
+                  <LogOut className="h-4 w-4 text-slate-500" />
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={handleLogin}>
-                  <User className="w-4 h-4 mr-2" />
+                  <User className="mr-2 h-4 w-4" />
                   Me connecter
                 </Button>
                 <Link to={createPageUrl('Booking')}>
-                  <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-5 text-sm shadow-md">
+                  <Button className="rounded-full bg-[#E95678] px-5 text-sm text-white shadow-md hover:bg-[#d44565]">
                     Réserver
                   </Button>
                 </Link>
@@ -96,54 +96,62 @@ function LayoutContent({ children }) {
           </div>
 
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-slate-100"
+            className="rounded-lg p-2 hover:bg-slate-100 md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-1">
+          <div className="space-y-1 border-t border-slate-100 bg-white px-6 py-4 md:hidden">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                   location.pathname === link.path
-                    ? 'text-[#E95678] bg-[#E95678]/10'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    ? 'bg-[#E95678]/10 text-[#E95678]'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 flex flex-col gap-2">
+            <div className="flex flex-col gap-2 pt-3">
               {currentClient ? (
                 <>
                   <Link to={createPageUrl('Booking')} onClick={() => setMenuOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">RÃ©server</Button>
+                    <Button variant="outline" className="w-full rounded-full">
+                      Réserver
+                    </Button>
                   </Link>
                   <Link to={createPageUrl('UserDashboard')} onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full bg-[#E95678] hover:bg-[#d44565] text-white rounded-full">Mon espace</Button>
+                    <Button className="w-full rounded-full bg-[#E95678] text-white hover:bg-[#d44565]">
+                      Mon espace
+                    </Button>
                   </Link>
                   {currentClient.role === 'admin' && (
                     <Link to={createPageUrl('Admin')} onClick={() => setMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-full">Admin</Button>
+                      <Button variant="outline" className="w-full rounded-full">
+                        Admin
+                      </Button>
                     </Link>
                   )}
                   <Button variant="outline" className="w-full rounded-full" onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" /> Se déconnecter
+                    <LogOut className="mr-2 h-4 w-4" /> Se déconnecter
                   </Button>
                 </>
               ) : (
                 <>
                   <Button variant="outline" className="w-full rounded-full" onClick={handleLogin}>
-                    <User className="w-4 h-4 mr-2" /> Me connecter
+                    <User className="mr-2 h-4 w-4" /> Me connecter
                   </Button>
                   <Link to={createPageUrl('Booking')} onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full bg-[#E95678] hover:bg-[#d44565] text-white rounded-full">Réserver</Button>
+                    <Button className="w-full rounded-full bg-[#E95678] text-white hover:bg-[#d44565]">
+                      Réserver
+                    </Button>
                   </Link>
                 </>
               )}
@@ -154,14 +162,14 @@ function LayoutContent({ children }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-[#2d2d2d] text-slate-300 pt-12 pb-6 mt-auto">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+      <footer className="mt-auto bg-[#2d2d2d] pb-6 pt-12 text-slate-300">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-3">
             <div>
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699ece5a2c48b8cfd3773f8a/23f22a7c8_logo_square.png"
                 alt="Naky"
-                className="h-14 w-auto mb-4 brightness-0 invert"
+                className="mb-4 h-14 w-auto brightness-0 invert"
               />
               <p className="text-sm leading-relaxed text-slate-400">
                 Le service de ménage à domicile pensé pour vous : rapide, fiable et humain. Région parisienne.
@@ -169,11 +177,11 @@ function LayoutContent({ children }) {
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">Navigation</h4>
+              <h4 className="mb-4 font-semibold text-white">Navigation</h4>
               <ul className="space-y-2 text-sm">
                 {navLinks.map((link) => (
                   <li key={link.path}>
-                    <Link to={link.path} className="hover:text-[#E95678] transition-colors">
+                    <Link to={link.path} className="transition-colors hover:text-[#E95678]">
                       {link.label}
                     </Link>
                   </li>
@@ -182,24 +190,24 @@ function LayoutContent({ children }) {
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">Contact</h4>
+              <h4 className="mb-4 font-semibold text-white">Contact</h4>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <a href="tel:0756986001" className="flex items-center gap-2 hover:text-[#E95678] transition-colors">
-                    <Phone className="w-4 h-4" />
+                  <a href="tel:0756986001" className="flex items-center gap-2 transition-colors hover:text-[#E95678]">
+                    <Phone className="h-4 w-4" />
                     07 56 98 60 01
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:contact@naky.fr" className="flex items-center gap-2 hover:text-[#E95678] transition-colors">
-                    <Mail className="w-4 h-4" />
+                  <a href="mailto:contact@naky.fr" className="flex items-center gap-2 transition-colors hover:text-[#E95678]">
+                    <Mail className="h-4 w-4" />
                     contact@naky.fr
                   </a>
                 </li>
               </ul>
               <div className="mt-6">
                 <Link to={createPageUrl('Booking')}>
-                  <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-6 text-sm">
+                  <Button className="rounded-full bg-[#E95678] px-6 text-sm text-white hover:bg-[#d44565]">
                     Réserver maintenant
                   </Button>
                 </Link>
@@ -207,10 +215,10 @@ function LayoutContent({ children }) {
             </div>
           </div>
 
-          <div className="border-t border-slate-600 pt-6 text-center text-xs text-slate-400 flex flex-col md:flex-row items-center justify-center gap-3">
-            <span>© {new Date().getFullYear()} Naky. Tous droits réservés. — SAS JULI</span>
-            <span className="hidden md:inline text-slate-600">·</span>
-            <Link to="/cgv" className="hover:text-[#E95678] transition-colors underline underline-offset-2">
+          <div className="flex flex-col items-center justify-center gap-3 border-t border-slate-600 pt-6 text-center text-xs text-slate-400 md:flex-row">
+            <span>© {new Date().getFullYear()} Naky. Tous droits réservés. - SAS JULI</span>
+            <span className="hidden text-slate-600 md:inline">·</span>
+            <Link to="/cgv" className="underline underline-offset-2 transition-colors hover:text-[#E95678]">
               Conditions Générales de Vente
             </Link>
           </div>
