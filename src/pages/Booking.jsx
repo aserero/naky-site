@@ -783,7 +783,7 @@ export default function BookingPage() {
             {step === 5 && bookingData.service_type === 'regular' && currentClient && <StepDuration data={bookingData} updateData={updateData} />}
             {step === 6 && bookingData.service_type === 'regular' && currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
             {step === 7 && bookingData.service_type === 'regular' && currentClient && <StepTime data={bookingData} updateData={updateData} />}
-            {step === 8 && bookingData.service_type === 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} onCardReady={setStripeSetupInfo} />}
+            {step === 8 && bookingData.service_type === 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Regular service - Not logged in */}
             {step === 4 && bookingData.service_type === 'regular' && !currentClient && <StepFrequency data={bookingData} updateData={updateData} errors={errors} />}
@@ -792,13 +792,13 @@ export default function BookingPage() {
             {step === 7 && bookingData.service_type === 'regular' && !currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
             {step === 8 && bookingData.service_type === 'regular' && !currentClient && <StepTime data={bookingData} updateData={updateData} />}
             {step === 9 && bookingData.service_type === 'regular' && !currentClient && <StepIdentity data={bookingData} updateData={updateData} onLoginClick={() => window.location.href = createPageUrl('Connexion')} errors={errors} />}
-            {step === 10 && bookingData.service_type === 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} onCardReady={setStripeSetupInfo} />}
+            {step === 10 && bookingData.service_type === 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Non-regular service - Logged in user */}
             {step === 5 && bookingData.service_type !== 'regular' && currentClient && <StepDuration data={bookingData} updateData={updateData} />}
             {step === 6 && bookingData.service_type !== 'regular' && currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
             {step === 7 && bookingData.service_type !== 'regular' && currentClient && <StepTime data={bookingData} updateData={updateData} />}
-            {step === 8 && bookingData.service_type !== 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} onCardReady={setStripeSetupInfo} />}
+            {step === 8 && bookingData.service_type !== 'regular' && currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
             
             {/* Non-regular service - Not logged in */}
             {step === 4 && bookingData.service_type !== 'regular' && !currentClient && <StepAnimals data={bookingData} updateData={updateData} />}
@@ -806,7 +806,7 @@ export default function BookingPage() {
             {step === 6 && bookingData.service_type !== 'regular' && !currentClient && <StepDate data={bookingData} updateData={updateData} errors={errors} />}
             {step === 7 && bookingData.service_type !== 'regular' && !currentClient && <StepTime data={bookingData} updateData={updateData} />}
             {step === 8 && bookingData.service_type !== 'regular' && !currentClient && <StepIdentity data={bookingData} updateData={updateData} onLoginClick={() => window.location.href = createPageUrl('Connexion')} errors={errors} />}
-            {step === 9 && bookingData.service_type !== 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} onCardReady={setStripeSetupInfo} />}
+            {step === 9 && bookingData.service_type !== 'regular' && !currentClient && <StepStripeCard data={bookingData} updateData={updateData} errors={errors} currentClient={currentClient} onCardReady={setStripeSetupInfo} />}
           </motion.div>
         </AnimatePresence>
 

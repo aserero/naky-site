@@ -6,7 +6,7 @@ import { Lock, CreditCard } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import CleaningSuppliesDialog from './CleaningSuppliesDialog';
 
-export default function StepStripeCard({ data, updateData, errors = {}, onCardReady }) {
+export default function StepStripeCard({ data, updateData, errors = {}, onCardReady, currentClient = null }) {
   const cardElementRef = useRef(null);
   const stripeRef = useRef(null);
   const cardRef = useRef(null);
@@ -42,8 +42,10 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         throw new Error("Impossible d'initialiser Stripe.");
       }
 
-      const clientEmail = data.contact_details?.email || data.email || '';
-      const clientName = `${data.contact_details?.first_name || data.first_name || ''} ${data.contact_details?.last_name || data.last_name || ''}`.trim();
+      const clientEmail = data.contact_details?.email || data.email || currentClient?.email || '';
+      const clientFirstName = data.contact_details?.first_name || data.first_name || currentClient?.first_name || '';
+      const clientLastName = data.contact_details?.last_name || data.last_name || currentClient?.last_name || '';
+      const clientName = `${clientFirstName} ${clientLastName}`.trim();
 
       const response = await base44.functions.invoke('createStripeSetupIntent', {
         clientEmail,
