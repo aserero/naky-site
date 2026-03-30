@@ -24,12 +24,10 @@ import { toast } from 'sonner';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
-import QuickBookingDialog from '@/components/booking/QuickBookingDialog';
 
 export default function UserDashboard() {
   const { currentClient, loading, updateClient } = useAuth();
   const queryClient = useQueryClient();
-  const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [profileData, setProfileData] = useState({});
 
@@ -100,13 +98,19 @@ export default function UserDashboard() {
           <h1 className="text-3xl font-bold text-slate-900">Bonjour, {currentClient.first_name}</h1>
           <p className="text-slate-500">Bienvenue dans votre espace client Naky.</p>
         </div>
-        <Button
-          onClick={() => setShowQuickBooking(true)}
-          className="bg-[#E95678] hover:bg-[#d44565] text-white"
-        >
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl('Home')}>
+            <Button variant="outline">
+              Retour Ã  l'accueil
+            </Button>
+          </Link>
+          <Link to={createPageUrl('Booking')}>
+            <Button className="bg-[#E95678] hover:bg-[#d44565] text-white">
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle réservation
-        </Button>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -470,12 +474,6 @@ export default function UserDashboard() {
           </div>
         )}
       </div>
-
-      <QuickBookingDialog
-        open={showQuickBooking}
-        onClose={() => setShowQuickBooking(false)}
-        client={currentClient}
-      />
     </div>
   );
 }

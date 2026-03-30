@@ -59,6 +59,11 @@ function LayoutContent({ children }) {
           <div className="hidden md:flex items-center gap-3">
             {currentClient ? (
               <>
+                <Link to={createPageUrl('Booking')}>
+                  <Button variant="outline" className="rounded-full px-5 text-sm">
+                    RÃ©server
+                  </Button>
+                </Link>
                 <Link to={createPageUrl('UserDashboard')}>
                   <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-5 text-sm shadow-md">
                     Mon espace
@@ -117,6 +122,9 @@ function LayoutContent({ children }) {
             <div className="pt-3 flex flex-col gap-2">
               {currentClient ? (
                 <>
+                  <Link to={createPageUrl('Booking')} onClick={() => setMenuOpen(false)}>
+                    <Button variant="outline" className="w-full rounded-full">RÃ©server</Button>
+                  </Link>
                   <Link to={createPageUrl('UserDashboard')} onClick={() => setMenuOpen(false)}>
                     <Button className="w-full bg-[#E95678] hover:bg-[#d44565] text-white rounded-full">Mon espace</Button>
                   </Link>

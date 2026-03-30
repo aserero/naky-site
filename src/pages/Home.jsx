@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, User } from 'lucide-react';
 import AnimatedCounters from '@/components/home/AnimatedCounters';
@@ -9,13 +9,6 @@ import { useAuth } from '@/components/AuthContext';
 
 export default function Home() {
   const { currentClient } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (currentClient) {
-      navigate(createPageUrl('UserDashboard'));
-    }
-  }, [currentClient, navigate]);
 
   const handleLogin = () => {
     base44.auth.redirectToLogin(createPageUrl('UserDashboard'));
@@ -57,13 +50,22 @@ export default function Home() {
               ))}
             </ul>
 
-            <Link to="/Booking">
+            <Link to={createPageUrl('Booking')}>
               <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-8 py-3 text-base font-semibold shadow-lg inline-flex items-center gap-2">
                 Je réserve mon ménage
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </Button>
             </Link>
 
+            {currentClient && (
+              <div className="mt-4">
+                <Link to={createPageUrl('UserDashboard')}>
+                  <Button variant="outline" className="rounded-full px-8 py-3 text-base font-medium">
+                    Voir mon compte
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Compteurs animés droite */}
@@ -104,7 +106,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Ménage sans prise de tête</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">Nos clients nous choisissent (et nous recommandent) pour une raison simple : on fait ce qu'on promet. Et on le fait bien.</p>
-            <Link to="/Booking" className="mt-6 inline-flex">
+            <Link to={createPageUrl('Booking')} className="mt-6 inline-flex">
               <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-8 py-3 font-semibold shadow-lg">Je réserve mon ménage</Button>
             </Link>
           </div>
@@ -151,7 +153,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link to="/Booking">
+            <Link to={createPageUrl('Booking')}>
               <Button className="bg-[#E95678] hover:bg-[#d44565] text-white rounded-full px-8 py-3 font-semibold shadow-lg">Je réserve mon ménage</Button>
             </Link>
           </div>
