@@ -284,11 +284,39 @@ async function getCurrentProfile() {
   const authUser = authData.user;
   if (!authUser) return null;
 
-  const { data: profile } = await supabase
+  let { data: profile, error } = await supabase
     .from('clients')
     .select('*')
     .eq('id', authUser.id)
     .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!profile) {
+    const fallbackPayload = {
+      id: authUser.id,
+      email: authUser.email,
+      first_name: authUser.user_metadata?.first_name || authUser.user_metadata?.firstName || null,
+      last_name: authUser.user_metadata?.last_name || authUser.user_metadata?.lastName || null,
+      phone: authUser.user_metadata?.phone || null,
+      role: 'client',
+      active: true,
+    };
+
+    const { data: insertedProfile, error: insertError } = await supabase
+      .from('clients')
+      .upsert(fallbackPayload)
+      .select('*')
+      .single();
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    profile = insertedProfile;
+  }
 
   return normalizeClient({
     id: authUser.id,
@@ -374,6 +402,13 @@ export const base44 = {
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              first_name: data.first_name || null,
+              last_name: data.last_name || null,
+              phone: data.phone || null,
+            },
+          },
         });
         if (signUpError) throw signUpError;
         const userId = authData.user?.id;
