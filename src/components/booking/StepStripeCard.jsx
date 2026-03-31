@@ -15,11 +15,13 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
   const [loadingStripe, setLoadingStripe] = useState(true);
   const [stripeInitError, setStripeInitError] = useState('');
   const [showSuppliesDialog, setShowSuppliesDialog] = useState(false);
+  const [replaceSavedCard, setReplaceSavedCard] = useState(false);
 
   const hasSavedCard = !!currentClient?.stripe_payment_method_id;
+  const shouldUseSavedCard = hasSavedCard && !replaceSavedCard;
 
   useEffect(() => {
-    if (hasSavedCard) {
+    if (shouldUseSavedCard) {
       setLoadingStripe(false);
       setStripeInitError('');
       setCardError('');
@@ -29,6 +31,7 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
     }
 
     let mounted = true;
+    setLoadingStripe(true);
 
     const initStripe = async () => {
       if (!window.Stripe) {
@@ -92,10 +95,10 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         cardRef.current = null;
       }
     };
-  }, [hasSavedCard, currentClient, data.contact_details, data.email, data.first_name, data.last_name, onCardReady, updateData]);
+  }, [shouldUseSavedCard, currentClient, data.contact_details, data.email, data.first_name, data.last_name, onCardReady, updateData]);
 
   useEffect(() => {
-    if (hasSavedCard || loadingStripe || !stripeRef.current || !cardElementRef.current || cardRef.current) return;
+    if (shouldUseSavedCard || loadingStripe || !stripeRef.current || !cardElementRef.current || cardRef.current) return;
 
     const elements = stripeRef.current.elements();
     const card = elements.create('card', {
@@ -121,7 +124,7 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         _stripeInstance: stripeRef.current,
       });
     });
-  }, [hasSavedCard, loadingStripe, updateData]);
+  }, [shouldUseSavedCard, loadingStripe, updateData]);
 
   return (
     <div className="space-y-6">
@@ -167,18 +170,47 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
             <Label className="font-semibold text-slate-700">Enregistrement de votre carte bancaire</Label>
           </div>
 
-          {hasSavedCard ? (
+          {shouldUseSavedCard ? (
             <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-4">
               <p className="text-sm font-semibold text-green-800">Empreinte bancaire deja enregistree</p>
               <p className="mt-1 text-xs text-green-700">
                 Nous reutilisons la carte deja securisee sur votre compte. Vous n'avez pas besoin de la saisir a nouveau.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setReplaceSavedCard(true);
+                  updateData({ _cardComplete: false, _stripeCard: null, _stripeInstance: null });
+                }}
+                className="mt-3 text-sm font-semibold text-[#E95678] underline underline-offset-4 hover:text-[#d44565]"
+              >
+                Remplacer ma carte
+              </button>
             </div>
           ) : (
             <>
               <p className="text-xs text-slate-500 mb-4">
                 Aucun prelevement ne sera effectue maintenant. Votre carte est enregistree uniquement pour valider votre identite et faciliter les futures transactions.
               </p>
+
+              {hasSavedCard && replaceSavedCard && (
+                <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-amber-800">Nouvelle carte en cours d'enregistrement</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplaceSavedCard(false);
+                      setStripeInitError('');
+                      setCardError('');
+                      updateData({ _cardComplete: true, _stripeCard: null, _stripeInstance: null });
+                      if (onCardReady) onCardReady(null);
+                    }}
+                    className="mt-2 text-sm font-semibold text-slate-700 underline underline-offset-4 hover:text-slate-900"
+                  >
+                    Garder ma carte actuelle
+                  </button>
+                </div>
+              )}
 
               {loadingStripe && (
                 <div className="flex items-center justify-center h-12 bg-gray-50 rounded-lg border border-slate-200">
