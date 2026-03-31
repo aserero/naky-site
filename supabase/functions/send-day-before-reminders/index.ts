@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { sendTransactionalEmail } from '../_shared/emailProvider.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -68,10 +69,8 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL') || 'contact@naky.fr';
 
-    if (!supabaseUrl || !serviceRoleKey || !resendApiKey) {
+    if (!supabaseUrl || !serviceRoleKey) {
       return Response.json({ error: 'Missing function secrets' }, { status: 500, headers: corsHeaders });
     }
 
@@ -125,14 +124,8 @@ Deno.serve(async (req) => {
         : `${reservation.duration || '—'}h`;
       const addressLabel = [reservation.address, reservation.cp, reservation.city].filter(Boolean).join(', ');
 
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `Naky <${fromEmail}>`,
+      try {
+        await sendTransactionalEmail({
           to: client.email,
           subject: `Rappel : votre menage Naky a lieu demain - ${reservation.ref || reservation.id}`,
           html: renderReminderHtml({
@@ -144,11 +137,14 @@ Deno.serve(async (req) => {
             addressLabel,
             amount: Number(reservation.price_ht || 0),
           }),
-        }),
-      });
-
-      if (response.ok) {
+        });
         sentBookingIds.push(reservation.id);
+      } catch (error) {
+        console.error('Reminder email failed', {
+          reservationId: reservation.id,
+          clientEmail: client.email,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
