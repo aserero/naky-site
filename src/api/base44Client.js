@@ -448,6 +448,14 @@ export const base44 = {
         return invokeSupabaseFunction('charge-client', payload);
       }
 
+      if (name === 'sendTransactionalEmail') {
+        return invokeSupabaseFunction('send-transactional-email', payload);
+      }
+
+      if (name === 'sendDayBeforeReminders') {
+        return invokeSupabaseFunction('send-day-before-reminders', payload);
+      }
+
       if (name === 'sendBookingNotification' || name === 'sendUrssafWebhook' || name === 'sendEnterpriseRequest') {
         return noopFunctionResult;
       }
@@ -479,6 +487,16 @@ export const base44 = {
 
         const { data } = supabase.storage.from('partner-files').getPublicUrl(filePath);
         return { file_url: data.publicUrl };
+      },
+      async SendEmail({ to, subject, body, html, cc, bcc, replyTo }) {
+        return base44.functions.invoke('sendTransactionalEmail', {
+          to,
+          subject,
+          html: html || body,
+          cc,
+          bcc,
+          replyTo,
+        });
       },
     },
   },

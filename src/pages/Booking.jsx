@@ -19,6 +19,7 @@ import StepStripeCard from '@/components/booking/StepStripeCard';
 import CleaningSuppliesDialog from '@/components/booking/CleaningSuppliesDialog';
 import EnterpriseDialog from '@/components/booking/EnterpriseDialog';
 import { useAuth } from '@/components/AuthContext';
+import { bookingConfirmationEmail, buildBookingEmailPayload } from '@/lib/emailTemplates';
 
 // --- Step Components ---
 
@@ -729,11 +730,23 @@ export default function BookingPage() {
         });
 
         console.log('Booking created:', booking.id);
-        
-        // Send notification without blocking redirect
-        base44.functions.invoke('sendBookingNotification', { bookingId: booking.id }).catch(err => 
-          console.error('Notification error:', err)
-        );
+
+        const bookingEmail = bookingConfirmationEmail({
+          clientName: bookingData.contact_details?.first_name || currentClient?.first_name || 'Bonjour',
+          booking: buildBookingEmailPayload({
+            booking,
+            amount: totalPrice,
+          }),
+        });
+
+        base44.functions
+          .invoke('sendTransactionalEmail', {
+            to: bookingData.contact_details?.email || currentClient?.email,
+            bcc: 'contact@naky.fr',
+            subject: bookingEmail.subject,
+            html: bookingEmail.html,
+          })
+          .catch(err => console.error('Booking confirmation email error:', err));
 
         // Clear saved state
         localStorage.removeItem('naky_booking_state');

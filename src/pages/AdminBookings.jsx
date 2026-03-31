@@ -37,6 +37,7 @@ import {
   Trash2
 } from 'lucide-react';
 import EditBookingDialog from '@/components/admin/EditBookingDialog';
+import { agentAssignedEmail, buildBookingEmailPayload, cleaningCompletedEmail } from '@/lib/emailTemplates';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -174,6 +175,47 @@ export default function AdminBookings() {
 
   const handleCancelBooking = (booking) => {
     updateMutation.mutate({ id: booking.id, data: { status: 'cancelled' } });
+  };
+
+  const sendAgentAssignedEmail = async (booking, employeeId) => {
+    const client = clients.find(c => c.id === booking.client_id);
+    const employee = employees.find(e => e.id === employeeId);
+
+    if (!client?.email || !employee) return;
+
+    const template = agentAssignedEmail({
+      clientName: client.first_name || booking.contact_details?.first_name || 'Bonjour',
+      booking: buildBookingEmailPayload({ booking }),
+      agent: {
+        name: [employee.first_name, employee.last_name].filter(Boolean).join(' '),
+        phone: employee.phone || '',
+      },
+    });
+
+    await base44.functions.invoke('sendTransactionalEmail', {
+      to: client.email,
+      bcc: 'contact@naky.fr',
+      subject: template.subject,
+      html: template.html,
+    });
+  };
+
+  const sendCleaningCompletedEmail = async (booking, invoiceUrl = '') => {
+    const client = clients.find(c => c.id === booking.client_id);
+    if (!client?.email) return;
+
+    const template = cleaningCompletedEmail({
+      clientName: client.first_name || booking.contact_details?.first_name || 'Bonjour',
+      booking: buildBookingEmailPayload({ booking, invoiceUrl }),
+      invoiceUrl,
+    });
+
+    await base44.functions.invoke('sendTransactionalEmail', {
+      to: client.email,
+      bcc: 'contact@naky.fr',
+      subject: template.subject,
+      html: template.html,
+    });
   };
 
   const parseDurationToHours = (duration) => {
@@ -358,7 +400,35 @@ export default function AdminBookings() {
     if (employeeId !== 'unassigned') {
       data.status = 'confirmed';
     }
-    updateMutation.mutate({ id: booking.id, data });
+    updateMutation.mutate(
+      { id: booking.id, data },
+      {
+        onSuccess: () => {
+          const shouldNotify =
+            employeeId !== 'unassigned' &&
+            (booking.employee_id !== employeeId || booking.status !== 'confirmed');
+
+          if (shouldNotify) {
+            sendAgentAssignedEmail({ ...booking, ...data }, employeeId).catch(err =>
+              console.error('Agent assigned email error:', err),
+            );
+          }
+        },
+      },
+    );
+  };
+
+  const handleCompleteBooking = (booking) => {
+    updateMutation.mutate(
+      { id: booking.id, data: { status: 'completed' } },
+      {
+        onSuccess: () => {
+          sendCleaningCompletedEmail({ ...booking, status: 'completed' }, booking.invoice_file_url || '').catch(err =>
+            console.error('Completed email error:', err),
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -670,12 +740,12 @@ export default function AdminBookings() {
                   )}
 
                   {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-2 w-full text-green-700 border-green-200 hover:bg-green-50"
-                      onClick={() => updateMutation.mutate({ id: booking.id, data: { status: 'completed' } })}
-                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2 w-full text-green-700 border-green-200 hover:bg-green-50"
+                        onClick={() => handleCompleteBooking(booking)}
+                      >
                       <FileCheck className="w-4 h-4" />
                       Terminer le ménage
                     </Button>
