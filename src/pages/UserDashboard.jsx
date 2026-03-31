@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, Clock, MapPin, CheckCircle2, FileText, User as UserIcon, Plus, XCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, CheckCircle2, FileText, User as UserIcon, Plus, XCircle, CreditCard } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -101,6 +101,7 @@ export default function UserDashboard() {
     const urssafStatus = currentClient.urssaf_status;
     const urssafCompleted = currentClient.urssaf_completed;
     const hasDoneRequest = urssafCompleted || (urssafStatus && urssafStatus !== 'none');
+    const canEditUrssaf = !urssafCompleted && urssafStatus !== 'ai_requested' && urssafStatus !== 'ai_accepted';
 
     if (!hasDoneRequest) {
       return (
@@ -169,7 +170,16 @@ export default function UserDashboard() {
                   La demande d'avance immédiate a été soumise à l'URSSAF. Vous serez informé dès que votre dossier sera traité.
                 </p>
               </div>
-              <div className="whitespace-nowrap rounded-lg bg-yellow-200 px-4 py-2 text-sm font-semibold text-yellow-700">AI demandée</div>
+              <div className="flex items-center gap-3">
+                {canEditUrssaf && (
+                  <Link to={createPageUrl('UrssafForm')}>
+                    <Button variant="outline" className="border-yellow-300 bg-white text-yellow-700 hover:bg-yellow-100">
+                      Modifier mon dossier
+                    </Button>
+                  </Link>
+                )}
+                <div className="whitespace-nowrap rounded-lg bg-yellow-200 px-4 py-2 text-sm font-semibold text-yellow-700">AI demandée</div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -187,7 +197,16 @@ export default function UserDashboard() {
                   Votre dossier URSSAF est complet. Notre équipe va effectuer la demande d'avance immédiate auprès de l'URSSAF. Vous serez informé dès validation.
                 </p>
               </div>
-              <div className="whitespace-nowrap rounded-lg bg-blue-200 px-4 py-2 text-sm font-semibold text-blue-700">Dossier complet</div>
+              <div className="flex items-center gap-3">
+                {canEditUrssaf && (
+                  <Link to={createPageUrl('UrssafForm')}>
+                    <Button variant="outline" className="border-blue-300 bg-white text-blue-700 hover:bg-blue-100">
+                      Modifier mon dossier
+                    </Button>
+                  </Link>
+                )}
+                <div className="whitespace-nowrap rounded-lg bg-blue-200 px-4 py-2 text-sm font-semibold text-blue-700">Dossier complet</div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -200,9 +219,18 @@ export default function UserDashboard() {
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
               <h3 className="mb-2 text-xl font-bold text-slate-600">Crédit d'impôt 50% - En cours de validation</h3>
-              <p className="text-slate-500">Votre dossier URSSAF est en cours de traitement. Vous serez notifié dès validation.</p>
+              <p className="text-slate-500">
+                Votre dossier URSSAF n'est pas encore finalisé. Vous pouvez le compléter maintenant ou le mettre à jour si nécessaire.
+              </p>
             </div>
-            <div className="whitespace-nowrap rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">En attente</div>
+            <div className="flex items-center gap-3">
+              <Link to={createPageUrl('UrssafForm')}>
+                <Button variant="outline" className="border-slate-300 bg-white text-slate-700 hover:bg-slate-100">
+                  Compléter mon dossier
+                </Button>
+              </Link>
+              <div className="whitespace-nowrap rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">En attente</div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -320,6 +348,20 @@ export default function UserDashboard() {
                     </span>
                   ) : (
                     <span className="text-orange-600">Non</span>
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Empreinte bancaire</p>
+                <p className="flex items-center gap-1 font-medium">
+                  {currentClient.stripe_payment_method_id ? (
+                    <span className="flex items-center gap-1 text-green-600">
+                      <CheckCircle2 className="h-4 w-4" /> Enregistrée
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-orange-600">
+                      <CreditCard className="h-4 w-4" /> Non enregistrée
+                    </span>
                   )}
                 </p>
               </div>
