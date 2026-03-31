@@ -95,7 +95,19 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         cardRef.current = null;
       }
     };
-  }, [shouldUseSavedCard, currentClient, data.contact_details, data.email, data.first_name, data.last_name, onCardReady, updateData]);
+  }, [
+    shouldUseSavedCard,
+    currentClient?.id,
+    currentClient?.email,
+    currentClient?.first_name,
+    currentClient?.last_name,
+    data.contact_details?.email,
+    data.contact_details?.first_name,
+    data.contact_details?.last_name,
+    data.email,
+    data.first_name,
+    data.last_name,
+  ]);
 
   useEffect(() => {
     if (shouldUseSavedCard || loadingStripe || !stripeRef.current || !cardElementRef.current || cardRef.current) return;
@@ -124,7 +136,7 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         _stripeInstance: stripeRef.current,
       });
     });
-  }, [shouldUseSavedCard, loadingStripe, updateData]);
+  }, [shouldUseSavedCard, loadingStripe]);
 
   return (
     <div className="space-y-6">

@@ -740,14 +740,19 @@ export default function BookingPage() {
           }),
         });
 
-        base44.functions
-          .invoke('sendTransactionalEmail', {
-            to: bookingData.contact_details?.email || currentClient?.email,
-            bcc: 'contact@naky.fr',
-            subject: bookingEmail.subject,
-            html: bookingEmail.html,
-          })
-          .catch(err => console.error('Booking confirmation email error:', err));
+        try {
+          await Promise.race([
+            base44.functions.invoke('sendTransactionalEmail', {
+              to: bookingData.contact_details?.email || currentClient?.email,
+              bcc: 'contact@naky.fr',
+              subject: bookingEmail.subject,
+              html: bookingEmail.html,
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 4000)),
+          ]);
+        } catch (err) {
+          console.error('Booking confirmation email error:', err);
+        }
 
         // Clear saved state
         localStorage.removeItem('naky_booking_state');
