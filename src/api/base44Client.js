@@ -234,9 +234,11 @@ function mapEmployeeForDb(input = {}) {
   const output = {};
   Object.entries(input).forEach(([key, value]) => {
     const mappedKey = employeeColumnMap[key];
-    if (mappedKey) output[mappedKey] = value;
+    if (!mappedKey) return;
+    if (key === 'status') return;
+    output[mappedKey] = value;
   });
-  if ('status' in input && !('active' in output)) {
+  if ('status' in input) {
     output.active = input.status === 'active';
   }
   return output;
