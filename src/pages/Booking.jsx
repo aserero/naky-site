@@ -424,6 +424,7 @@ export default function BookingPage() {
 
   const validateStep = (currentStep) => {
     const newErrors = {};
+    const hasSavedCard = !!currentClient?.stripe_payment_method_id;
     
     // Skip address validation for logged-in users
     if (currentStep === 1 && !currentClient) {
@@ -520,7 +521,7 @@ export default function BookingPage() {
     const paymentStep = currentClient ? 8 : (bookingData.service_type === 'regular' ? 10 : 9);
     if (currentStep === paymentStep || (currentClient && currentStep === 8) || (!currentClient && ((currentStep === 10 && bookingData.service_type === 'regular') || (currentStep === 9 && bookingData.service_type !== 'regular')))) {
       if (!bookingData.has_cleaning_supplies) newErrors.has_cleaning_supplies = "Vous devez confirmer avoir le matériel nécessaire";
-      if (!bookingData._cardComplete) newErrors._cardComplete = "Veuillez renseigner vos informations bancaires";
+      if (!hasSavedCard && !bookingData._cardComplete) newErrors._cardComplete = "Veuillez renseigner vos informations bancaires";
     }
 
     setErrors(newErrors);

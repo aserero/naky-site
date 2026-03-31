@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, CreditCard } from 'lucide-react';
+import { CreditCard, Lock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import CleaningSuppliesDialog from './CleaningSuppliesDialog';
 
@@ -10,15 +10,26 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
   const cardElementRef = useRef(null);
   const stripeRef = useRef(null);
   const cardRef = useRef(null);
+
   const [cardError, setCardError] = useState('');
-  const [cardComplete, setCardComplete] = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
   const [loadingStripe, setLoadingStripe] = useState(true);
   const [stripeInitError, setStripeInitError] = useState('');
   const [showSuppliesDialog, setShowSuppliesDialog] = useState(false);
 
-  // Load Stripe and create SetupIntent
+  const hasSavedCard = !!currentClient?.stripe_payment_method_id;
+
   useEffect(() => {
+    if (hasSavedCard) {
+      setLoadingStripe(false);
+      setStripeInitError('');
+      setCardError('');
+      updateData({ _cardComplete: true, _stripeCard: null, _stripeInstance: null });
+      if (onCardReady) onCardReady(null);
+      return undefined;
+    }
+
+    let mounted = true;
+
     const initStripe = async () => {
       if (!window.Stripe) {
         await new Promise((resolve, reject) => {
@@ -30,11 +41,12 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
         });
       }
 
-      const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
+      const publishableKey =
+        import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
         (await base44.functions.invoke('getStripePublishableKey', {})).data?.key;
 
       if (!publishableKey) {
-        throw new Error("La clé Stripe n'est pas configurée.");
+        throw new Error("La cle Stripe n'est pas configuree.");
       }
 
       stripeRef.current = window.Stripe(publishableKey);
@@ -54,29 +66,36 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
 
       const { clientSecret: secret, customerId } = response.data;
       if (!secret) {
-        throw new Error("Impossible de préparer le formulaire carte.");
+        throw new Error('Impossible de preparer le formulaire carte.');
       }
-      setClientSecret(secret);
 
-      if (onCardReady) onCardReady({ customerId, setupClientSecret: secret });
+      if (mounted && onCardReady) {
+        onCardReady({ customerId, setupClientSecret: secret });
+      }
 
-      setLoadingStripe(false);
+      if (mounted) {
+        setLoadingStripe(false);
+      }
     };
 
-    initStripe().catch(err => {
+    initStripe().catch((err) => {
+      if (!mounted) return;
       console.error('Stripe init error:', err);
-      setStripeInitError(err?.message || "Le formulaire de carte ne peut pas se charger pour le moment.");
+      setStripeInitError(err?.message || 'Le formulaire de carte ne peut pas se charger pour le moment.');
       setLoadingStripe(false);
     });
 
     return () => {
-      if (cardRef.current) cardRef.current.destroy();
+      mounted = false;
+      if (cardRef.current) {
+        cardRef.current.destroy();
+        cardRef.current = null;
+      }
     };
-  }, []);
+  }, [hasSavedCard, currentClient, data.contact_details, data.email, data.first_name, data.last_name, onCardReady, updateData]);
 
-  // Mount card element only after loading is done and the DOM node is available
   useEffect(() => {
-    if (loadingStripe || !stripeRef.current || !cardElementRef.current || cardRef.current) return;
+    if (hasSavedCard || loadingStripe || !stripeRef.current || !cardElementRef.current || cardRef.current) return;
 
     const elements = stripeRef.current.elements();
     const card = elements.create('card', {
@@ -96,21 +115,24 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
 
     card.on('change', (event) => {
       setCardError(event.error ? event.error.message : '');
-      setCardComplete(event.complete);
-      updateData({ _cardComplete: event.complete, _stripeCard: card, _stripeInstance: stripeRef.current });
+      updateData({
+        _cardComplete: event.complete,
+        _stripeCard: card,
+        _stripeInstance: stripeRef.current,
+      });
     });
-  }, [loadingStripe]);
+  }, [hasSavedCard, loadingStripe, updateData]);
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Dernières informations</h2>
-        <p className="text-slate-500">Avant de finaliser votre réservation</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Dernieres informations</h2>
+        <p className="text-slate-500">Avant de finaliser votre reservation</p>
       </div>
 
       <div className="space-y-6 max-w-md mx-auto">
         <Textarea
-          placeholder="Instructions pour le ménage (codes d'accès, précisions...)"
+          placeholder="Instructions pour le menage (codes d'acces, precisions...)"
           value={data.instructions || ''}
           onChange={(e) => updateData({ instructions: e.target.value })}
           className="bg-white border-slate-200 min-h-[100px]"
@@ -123,52 +145,68 @@ export default function StepStripeCard({ data, updateData, errors = {}, onCardRe
             onCheckedChange={(checked) => updateData({ has_cleaning_supplies: checked })}
           />
           <Label htmlFor="cleaning_supplies" className="cursor-pointer text-sm leading-tight">
-            Je confirme que j'ai tout le matériel nécessaire.{' '}
+            Je confirme que j'ai tout le materiel necessaire.{' '}
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); setShowSuppliesDialog(true); }}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowSuppliesDialog(true);
+              }}
               className="text-[#E95678] underline font-bold hover:text-[#d44565]"
             >
-              Voir le détail du matériel
+              Voir le detail du materiel
             </button>
           </Label>
         </div>
         {errors.has_cleaning_supplies && <p className="text-xs text-red-500">{errors.has_cleaning_supplies}</p>}
         <CleaningSuppliesDialog open={showSuppliesDialog} onClose={() => setShowSuppliesDialog(false)} />
 
-        {/* Stripe Card */}
         <div className="mt-6">
           <div className="flex items-center gap-2 mb-3">
             <CreditCard className="w-4 h-4 text-slate-500" />
             <Label className="font-semibold text-slate-700">Enregistrement de votre carte bancaire</Label>
           </div>
-          <p className="text-xs text-slate-500 mb-4">
-            Aucun prélèvement ne sera effectué maintenant. Votre carte est enregistrée uniquement pour valider votre identité et faciliter les futures transactions.
-          </p>
 
-          {loadingStripe && (
-            <div className="flex items-center justify-center h-12 bg-gray-50 rounded-lg border border-slate-200">
-              <span className="text-sm text-slate-400">Chargement du formulaire de paiement...</span>
+          {hasSavedCard ? (
+            <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-4">
+              <p className="text-sm font-semibold text-green-800">Empreinte bancaire deja enregistree</p>
+              <p className="mt-1 text-xs text-green-700">
+                Nous reutilisons la carte deja securisee sur votre compte. Vous n'avez pas besoin de la saisir a nouveau.
+              </p>
             </div>
-          )}
-          {!stripeInitError && (
-            <div
-              ref={cardElementRef}
-              className={`p-3 border border-slate-200 rounded-lg bg-white min-h-[44px] ${loadingStripe ? 'hidden' : ''}`}
-            />
-          )}
+          ) : (
+            <>
+              <p className="text-xs text-slate-500 mb-4">
+                Aucun prelevement ne sera effectue maintenant. Votre carte est enregistree uniquement pour valider votre identite et faciliter les futures transactions.
+              </p>
 
-          {stripeInitError && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
-              {stripeInitError} Vérifie les clés Stripe et les fonctions Supabase.
-            </div>
+              {loadingStripe && (
+                <div className="flex items-center justify-center h-12 bg-gray-50 rounded-lg border border-slate-200">
+                  <span className="text-sm text-slate-400">Chargement du formulaire de paiement...</span>
+                </div>
+              )}
+
+              {!loadingStripe && !stripeInitError && (
+                <div
+                  ref={cardElementRef}
+                  className="p-3 border border-slate-200 rounded-lg bg-white min-h-[44px]"
+                />
+              )}
+
+              {stripeInitError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+                  {stripeInitError} Verifie les cles Stripe et les fonctions Supabase.
+                </div>
+              )}
+
+              {cardError && <p className="text-xs text-red-500 mt-2">{cardError}</p>}
+              {errors._cardComplete && <p className="text-xs text-red-500 mt-2">{errors._cardComplete}</p>}
+            </>
           )}
-          {cardError && <p className="text-xs text-red-500 mt-2">{cardError}</p>}
-          {errors._cardComplete && <p className="text-xs text-red-500 mt-2">{errors._cardComplete}</p>}
 
           <div className="flex items-center gap-1 mt-3 text-xs text-slate-400">
             <Lock className="w-3 h-3" />
-            Paiement sécurisé par Stripe. Vos données bancaires ne sont jamais stockées sur nos serveurs.
+            Paiement securise par Stripe. Vos donnees bancaires ne sont jamais stockees sur nos serveurs.
           </div>
         </div>
       </div>
