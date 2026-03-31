@@ -199,7 +199,6 @@ export default function AdminBookings() {
 
     await base44.functions.invoke('sendTransactionalEmail', {
       to: client.email,
-      bcc: 'contact@naky.fr',
       subject: template.subject,
       html: template.html,
     });
