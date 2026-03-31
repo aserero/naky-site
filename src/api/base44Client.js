@@ -274,24 +274,60 @@ function mapBookingForDb(input = {}) {
     if (mappedKey && mappedKey !== 'date') output[mappedKey] = value;
   });
 
-  const serviceId = input.service_type || input.service_id || 'regular';
+  const hasServiceInfo = 'service_type' in input || 'service_id' in input;
+  const hasDuration = 'duration' in input;
+  const hasPricing = 'total_price' in input || 'price_ht' in input || 'price_net' in input;
+  const hasDate = 'date' in input || 'time' in input;
+  const hasAdvance = 'advance_immediate' in input || 'avance_immediate' in input;
+  const hasPets = 'has_animals' in input || 'has_pets' in input;
+  const hasEquipment = 'has_cleaning_supplies' in input || 'has_equipment' in input;
+  const hasBilling = 'billing_status' in input || 'payment_status' in input;
+
+  const serviceId = input.service_type || input.service_id || output.service_id || 'regular';
   const numericDuration = typeof input.duration === 'string'
     ? Number(input.duration.replace('h30', '.5').replace('h', ''))
     : Number(input.duration || 0);
   const pricing = servicePricing(serviceId);
-  const totalPrice = Number(input.total_price || pricing.priceHT * numericDuration || 0);
+  const totalPrice = Number(input.total_price || input.price_ht || pricing.priceHT * numericDuration || 0);
 
-  output.ref = input.ref || output.ref || `NK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-  output.service_id = serviceId;
-  output.service_label = input.service_label || input.service_type || serviceId;
-  output.duration = numericDuration;
-  output.price_ht = totalPrice;
-  output.price_net = Number(input.price_net || pricing.priceNet * numericDuration || 0);
-  output.date = formatBookingDate(input.date, input.time) || input.date || null;
-  output.avance_immediate = input.advance_immediate ?? input.avance_immediate ?? false;
-  output.has_pets = input.has_animals ?? input.has_pets ?? false;
-  output.has_equipment = input.has_cleaning_supplies ?? input.has_equipment ?? false;
-  output.payment_status = input.billing_status === 'paid' ? 'paid' : 'unpaid';
+  if ('ref' in input || !output.ref) {
+    output.ref = input.ref || output.ref || `NK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  }
+
+  if (hasServiceInfo) {
+    output.service_id = serviceId;
+    output.service_label = input.service_label || input.service_type || serviceId;
+  }
+
+  if (hasDuration) {
+    output.duration = numericDuration;
+  }
+
+  if (hasPricing || (hasServiceInfo && hasDuration)) {
+    output.price_ht = totalPrice;
+    output.price_net = Number(input.price_net || pricing.priceNet * numericDuration || 0);
+  }
+
+  if (hasDate) {
+    output.date = formatBookingDate(input.date, input.time) || input.date || null;
+  }
+
+  if (hasAdvance) {
+    output.avance_immediate = input.advance_immediate ?? input.avance_immediate ?? false;
+  }
+
+  if (hasPets) {
+    output.has_pets = input.has_animals ?? input.has_pets ?? false;
+  }
+
+  if (hasEquipment) {
+    output.has_equipment = input.has_cleaning_supplies ?? input.has_equipment ?? false;
+  }
+
+  if (hasBilling) {
+    output.payment_status = input.payment_status || (input.billing_status === 'paid' ? 'paid' : 'unpaid');
+  }
+
   return output;
 }
 
