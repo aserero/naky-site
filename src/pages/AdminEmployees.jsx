@@ -45,6 +45,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import EmployeeDocuments from '@/components/admin/EmployeeDocuments';
+import { toast } from '@/components/ui/use-toast';
 
 export default function AdminEmployees() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -67,6 +68,19 @@ export default function AdminEmployees() {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setIsDialogOpen(false);
       setEditingEmployee(null);
+      setDocuments([]);
+      setPhotoUrl('');
+      toast({
+        title: 'Employée créée',
+        description: "La fiche employée a bien été ajoutée.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Création impossible',
+        description: error?.message || "Vérifiez les colonnes et les droits Supabase de la table employees.",
+        variant: 'destructive',
+      });
     },
   });
 
@@ -76,6 +90,19 @@ export default function AdminEmployees() {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setIsDialogOpen(false);
       setEditingEmployee(null);
+      setDocuments([]);
+      setPhotoUrl('');
+      toast({
+        title: 'Employée mise à jour',
+        description: 'Les modifications ont bien été enregistrées.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Mise à jour impossible',
+        description: error?.message || "Vérifiez les colonnes et les droits Supabase de la table employees.",
+        variant: 'destructive',
+      });
     },
   });
 
@@ -83,6 +110,17 @@ export default function AdminEmployees() {
     mutationFn: (id) => base44.entities.Employee.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast({
+        title: 'Employée désactivée',
+        description: "La fiche employée a bien été mise à jour.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Suppression impossible',
+        description: error?.message || "Vérifiez les droits Supabase de la table employees.",
+        variant: 'destructive',
+      });
     },
   });
 

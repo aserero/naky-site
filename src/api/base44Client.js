@@ -71,6 +71,7 @@ const employeeColumnMap = {
   active: 'active',
   documents: 'documents',
   color: 'color',
+  photo_url: 'photo_url',
 };
 
 const invoiceColumnMap = {
