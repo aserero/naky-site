@@ -136,7 +136,12 @@ export default function AdminBookings() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Booking.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+    },
+    onError: (error) => {
+      toast.error(error?.message || 'Mise a jour impossible');
+    },
   });
 
   const deleteMutation = useMutation({
@@ -404,6 +409,7 @@ export default function AdminBookings() {
       { id: booking.id, data },
       {
         onSuccess: () => {
+          toast.success(employeeId === 'unassigned' ? 'Intervenante retiree' : 'Intervenante assignee');
           const shouldNotify =
             employeeId !== 'unassigned' &&
             (booking.employee_id !== employeeId || booking.status !== 'confirmed');
@@ -413,6 +419,9 @@ export default function AdminBookings() {
               console.error('Agent assigned email error:', err),
             );
           }
+        },
+        onError: (error) => {
+          toast.error(error?.message || "Impossible d'affecter cette employee");
         },
       },
     );
