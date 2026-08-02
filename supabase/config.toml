@@ -1,0 +1,25 @@
+# Config Supabase CLI (supabase functions deploy / db push)
+
+[functions.create-setup-intent]
+verify_jwt = false   # le visiteur du funnel n'est pas encore authentifié
+
+[functions.charge-client]
+verify_jwt = true
+
+[functions.bill-booking]
+verify_jwt = true
+
+[functions.submit-urssaf]
+verify_jwt = true
+
+[functions.abby-webhook]
+verify_jwt = false   # webhook entrant, protégé par x-abby-secret
+
+[functions.notify-booking]
+verify_jwt = true
+
+[functions.notify-assignment]
+verify_jwt = false   # Database Webhook, protégé par x-webhook-secret
+
+[functions.enterprise-request]
+verify_jwt = false   # formulaire public
